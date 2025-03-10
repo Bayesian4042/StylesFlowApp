@@ -15,16 +15,10 @@ API_V1_PREFIX: str = "/api"
 ALLOWED_HOSTS: List[str] = ["*"]
 
 ENV: str = config.get("ENV", "development")
-DEBUG: bool = config.get("DEBUG", "True").lower() == "true"
+KLING_API_KEY: str = config.get("KLING_API_KEY", "")
+REPLICATE_API_TOKEN: str = config.get("REPLICATE_API_TOKEN", "")
+FAL_API_KEY: str = config.get("FAL_API_KEY", "")
 DATABASE_URL: str = config.get("DATABASE_URL", "sqlite://db.sqlite3")
-SECRET_KEY: str = config.get("SECRET_KEY", "your-super-secret-key-change-it")
-
-# SMTP Configuration
-SMTP_USERNAME: Optional[str] = config.get("SMTP_USERNAME")
-SMTP_PASSWORD: Optional[str] = config.get("SMTP_PASSWORD")
-SMTP_FROM: Optional[str] = config.get("SMTP_FROM")
-SMTP_SERVER: Optional[str] = config.get("SMTP_SERVER")
-SMTP_PORT: int = int(config.get("SMTP_PORT", "587"))
 
 # Tortoise ORM Config
 TORTOISE_ORM = {

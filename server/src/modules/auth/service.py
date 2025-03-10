@@ -7,7 +7,6 @@ from datetime import timedelta, datetime, UTC
 import secrets
 from fastapi import HTTPException, status
 from src.models.user import User
-from src.modules.email.service import email_service
 from .schemas import UserCreate, UserUpdate, Token, UserResponse
 from .jwt import create_access_token
 from .constants import (

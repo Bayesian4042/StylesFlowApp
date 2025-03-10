@@ -2,7 +2,7 @@
 FastAPI Template Application
 This is a template for FastAPI applications following best practices.
 """
-
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -17,6 +17,7 @@ load_dotenv('.env')
 from src.config import  settings
 from src.database import init_db, close_db
 from src.modules.auth.router import router as user_router
+from src.modules.image_generation.router import router as image_generation_router
 from src.exceptions import (
     http_exception_handler,
     validation_exception_handler,
@@ -57,6 +58,7 @@ app.add_middleware(
 
 # Include routers with API versioning
 app.include_router(user_router, prefix=settings.API_V1_PREFIX)
+app.include_router(image_generation_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
@@ -77,3 +79,6 @@ async def health_check():
         dict: A simple message indicating the API is healthy
     """
     return {"version": settings.VERSION, "status": "healthy"}
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)

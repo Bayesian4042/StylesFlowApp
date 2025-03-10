@@ -4,7 +4,12 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { RefreshCcw } from "lucide-react"
 
-export default function PromptInput() {
+interface PromptInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export default function PromptInput({ value, onChange }: PromptInputProps) {
   const [hints] = useState(["Succulent Plants", "B&W Female Portrait"])
 
   return (
@@ -31,6 +36,8 @@ export default function PromptInput() {
 
       <div className="bg-[#1a1a1f] rounded-lg p-4 mb-4">
         <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           className="w-full bg-transparent border-none focus:outline-none resize-none text-gray-300 h-24"
           placeholder="Please describe your creative ideas for the image, or view Help Center for a quick start."
         />
@@ -63,4 +70,3 @@ export default function PromptInput() {
     </div>
   )
 }
-

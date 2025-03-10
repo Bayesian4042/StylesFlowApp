@@ -82,3 +82,77 @@ async def health_check():
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+
+
+"""
+import logging
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from src.modules.routers import external_tryon, local_tryon
+import datetime
+from dotenv import load_dotenv
+
+load_dotenv('.env')
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="Virtual Cloth Try-On",
+    description="virtual try-on using both external services and local pipeline",
+    version="1.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc"
+)
+
+# Configure CORS middleware
+origins = [
+    "http://localhost:3000",    # Next.js dev server
+    "https://production-domain.com",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"]  # For file downloads if needed
+)
+
+# Include routers with API prefix
+app.include_router(
+    local_tryon.router,
+    prefix="/api/local",
+    tags=["Local TryOn"]
+)
+
+app.include_router(
+    external_tryon.router,
+    prefix="/api/external",
+    tags=["External TryOn"]
+)
+
+# Health check endpoints
+@app.get("/", include_in_schema=False)
+async def root():
+    return {"message": "Virtual Try-On API Service"}
+
+@app.get("/api/health", tags=["Health"])
+async def health_check():
+    return {
+        "status": "OK",
+        "version": "1.0.0",
+        "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
+    }
+
+
+
+
+"""

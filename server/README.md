@@ -55,21 +55,6 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv sync
 ```
 
-4. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-5. Initialize the database:
-```bash
-aerich init -t src.config.settings.TORTOISE_ORM
-aerich init-db
-```
-- For new Migrations:
-```bash
-aerich migrate
-aerich upgrade
 ```
 6. Run the development server:
 ```bash

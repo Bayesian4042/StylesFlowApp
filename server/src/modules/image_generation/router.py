@@ -137,7 +137,7 @@ async def generate_image_endpoint(
             num_images=request.num_images,
             width=request.width,
             height=request.height,
-            negative_prompt=request.negative_prompt if request.negative_prompt else 'high quality, realistic, always have cloths',
+            negative_prompt=request.negative_prompt if request.negative_prompt else 'low quality, unrealistic, no cloths',
             reference_image=request.reference_image,
             aspect_ratio=request.aspect_ratio,
             guidance=request.guidance,

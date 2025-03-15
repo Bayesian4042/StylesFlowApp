@@ -10,8 +10,8 @@ COPY . /app
 WORKDIR /app
 RUN uv sync --frozen --no-cache
 
-RUN /app/.venv/bin/aerich migrate
-RUN /app/.venv/bin/aerich upgrade
+# RUN /app/.venv/bin/aerich migrate
+# RUN /app/.venv/bin/aerich upgrade
 
 EXPOSE 8000
 

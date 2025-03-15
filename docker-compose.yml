@@ -19,11 +19,11 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8001:8001"
     env_file:
       - server/.env
     environment:
-      - PORT=8000
+      - PORT=8001
     restart: unless-stopped
     networks:
       - app_network

@@ -39,9 +39,9 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 	};
 
 	return (
-		<div className='flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-[#1a1a1f] min-h-[400px]'>
+		<div className='flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-[#1a1a1f] min-h-[600px]'>
 			{imageUrl ? (
-				<div className='relative flex h-full w-full items-center justify-center p-4 min-h-[400px]'>
+				<div className='relative flex h-full w-full items-center justify-center p-4'>
 					{isLoading && (
 						<div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50'>
 							<div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
@@ -56,7 +56,7 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 							key={imageUrl} // Force re-render when URL changes
 							src={imageUrl}
 							alt='Generated image'
-							className='max-w-full max-h-[600px] rounded-lg object-contain'
+							className='w-auto h-auto max-w-full max-h-[600px] rounded-lg object-contain'
 							onLoad={handleImageLoad}
 							onError={handleImageError}
 							crossOrigin="anonymous"

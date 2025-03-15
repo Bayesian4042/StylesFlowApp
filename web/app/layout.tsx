@@ -27,9 +27,9 @@ export default async function RootLayout({
 				<Suspense fallback={<Loading />}>
 					<Providers>
 						<SidebarProvider>
-							<div className="flex h-screen overflow-hidden bg-background group/sidebar">
+							<div className='group/sidebar flex h-screen overflow-hidden bg-background'>
 								<NavSidebar />
-								<main className="flex-1 overflow-auto transition-all duration-300 group-data-[collapsible=icon]/sidebar:pl-[48px]">
+								<main className='flex-1 overflow-auto transition-all duration-300 group-data-[collapsible=icon]/sidebar:pl-[48px]'>
 									{children}
 								</main>
 							</div>

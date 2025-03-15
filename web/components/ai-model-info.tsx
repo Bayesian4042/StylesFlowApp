@@ -14,7 +14,7 @@ export default function AIModelInfo() {
 						<AccordionTrigger>How does virtual try-on work?</AccordionTrigger>
 						<AccordionContent>
 							Our virtual try-on technology uses advanced AI to map clothing items onto your body or a model. It
-							analyzes the clothing's structure and texture, then realistically renders it as if you were actually
+							analyzes the clothing structure and texture, then realistically renders it as if you were actually
 							wearing it.
 						</AccordionContent>
 					</AccordionItem>
@@ -39,8 +39,8 @@ export default function AIModelInfo() {
 					<AccordionItem value='item-4'>
 						<AccordionTrigger>Privacy and data usage</AccordionTrigger>
 						<AccordionContent>
-							Your uploaded images are processed securely and only used for the virtual try-on feature. We don't store
-							your images longer than necessary to provide the service, and they're never used to train our AI models
+							Your uploaded images are processed securely and only used for the virtual try-on feature. We dont store
+							your images longer than necessary to provide the service, and they are never used to train our AI models
 							without explicit consent.
 						</AccordionContent>
 					</AccordionItem>

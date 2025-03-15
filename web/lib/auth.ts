@@ -31,10 +31,14 @@ export const authOptions: NextAuthOptions = {
 	secret: NEXTAUTH_SECRET,
 	session: {
 		strategy: 'jwt',
+		maxAge: 30 * 24 * 60 * 60, // 30 days
+		updateAge: 24 * 60 * 60, // 24 hours
 	},
 	pages: {
 		signIn: '/login',
+		error: '/error',
 	},
+	debug: true,
 	providers: [
 		CredentialsProvider({
 			name: 'Credentials',

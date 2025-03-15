@@ -8,11 +8,16 @@ from .service import generate_image, ImageGenerationResult, virtual_try_on_with_
 from ...config import settings
 
 
-async def fetch_image(url: str) -> bytes:
-    """Fetch image from URL and return bytes"""
+import base64
+
+async def fetch_image(url: str) -> tuple[str, str]:
+    """Fetch image from URL and return as base64 data URL"""
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            return await response.read()
+            content_type = response.headers.get('Content-Type', 'image/png')
+            image_data = await response.read()
+            base64_data = base64.b64encode(image_data).decode('utf-8')
+            return f"data:{content_type};base64,{base64_data}", content_type
 
 
 router = APIRouter(prefix="/image-generation", tags=["image-generation"])
@@ -21,11 +26,11 @@ router = APIRouter(prefix="/image-generation", tags=["image-generation"])
 @router.get("/view-image")
 async def view_image(url: str):
     """
-    View an image from URL in the browser
+    Convert an image URL to base64 data URL
     """
     try:
-        image_data = await fetch_image(url)
-        return Response(content=image_data, media_type="image/webp")
+        data_url, _ = await fetch_image(url)
+        return {"data_url": data_url}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch image: {str(e)}")
 

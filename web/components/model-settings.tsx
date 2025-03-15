@@ -21,7 +21,7 @@ export default function ModelSettings({
   onSkinToneChange 
 }: ModelSettingsProps) {
   return (
-    <div className="p-4 space-y-5">
+    <div className="p-4 space-y-5 relative">
       {/* Header */}
       <div className="flex items-center gap-2 pb-2">
         <User className="w-5 h-5 text-muted-foreground" />
@@ -29,7 +29,7 @@ export default function ModelSettings({
       </div>
 
       {/* Gender Selection */}
-      <div className="space-y-2">
+      <div className="space-y-2 relative z-10">
         <span className="text-sm text-muted-foreground">Gender:</span>
         <div className="flex gap-4">
           <button
@@ -62,7 +62,7 @@ export default function ModelSettings({
       </div>
 
       {/* Age Selection */}
-      <div className="space-y-2">
+      <div className="space-y-2 relative z-10">
         <span className="text-sm text-muted-foreground">Age:</span>
         <div className="flex gap-4">
           <button
@@ -108,7 +108,7 @@ export default function ModelSettings({
       </div>
 
       {/* Skin Tone Selection */}
-      <div className="space-y-2">
+      <div className="space-y-2 relative z-10">
         <span className="text-sm text-muted-foreground">Skin Tone:</span>
         <div className="flex gap-3">
           <button

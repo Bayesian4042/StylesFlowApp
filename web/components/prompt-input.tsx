@@ -14,7 +14,7 @@ export default function PromptInput({ value, onChange, modelSettings }: PromptIn
 	const [hints] = useState(['Succulent Plants', 'B&W Female Portrait']);
 
 	return (
-		<div className='border-b border-gray-800 p-4'>
+		<div className='border-b border-gray-800 p-4 relative z-10'>
 			<div className='mb-4 flex items-center gap-2'>
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
@@ -35,11 +35,11 @@ export default function PromptInput({ value, onChange, modelSettings }: PromptIn
 				<h2 className='text-sm font-medium'>Prompt</h2>
 			</div>
 
-			<div className='mb-4 rounded-lg bg-[#1a1a1f] p-4'>
+			<div className='mb-4 rounded-lg bg-[#1a1a1f] p-4 relative'>
 				<textarea
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-					className='h-24 w-full resize-none border-none bg-transparent text-gray-300 focus:outline-none'
+					className='h-24 w-full resize-none border-none bg-transparent text-gray-300 focus:outline-none relative z-10'
 					placeholder='Please describe how you want to your AI model such as pose, background, etc.'
 				/>
 				{modelSettings && (

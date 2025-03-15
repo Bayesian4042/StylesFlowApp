@@ -7,9 +7,10 @@ import { RefreshCcw } from 'lucide-react';
 interface PromptInputProps {
 	value: string;
 	onChange: (value: string) => void;
+	modelSettings?: string;
 }
 
-export default function PromptInput({ value, onChange }: PromptInputProps) {
+export default function PromptInput({ value, onChange, modelSettings }: PromptInputProps) {
 	const [hints] = useState(['Succulent Plants', 'B&W Female Portrait']);
 
 	return (
@@ -39,9 +40,14 @@ export default function PromptInput({ value, onChange }: PromptInputProps) {
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
 					className='h-24 w-full resize-none border-none bg-transparent text-gray-300 focus:outline-none'
-					placeholder='Please describe your creative ideas for the image, or view Help Center for a quick start.'
+					placeholder='Please describe how you want to your AI model such as pose, background, etc.'
 				/>
-				<div className='text-xs text-gray-500'>
+				{modelSettings && (
+					<div className='mt-2 text-sm text-gray-500'>
+						Will be appended: {modelSettings}
+					</div>
+				)}
+				<div className='mt-2 text-xs text-gray-500'>
 					<span>or view </span>
 					<a href='#' className='text-[#4caf50]'>
 						Help Center

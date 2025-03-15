@@ -28,6 +28,8 @@ FROM node:20-alpine3.19 AS release
 # Set the working directory inside the container to /app.
 WORKDIR /app
 
+RUN npm i -g pnpm
+
 # Globally install the package manager pnpm.
 RUN npm i -g pnpm
 

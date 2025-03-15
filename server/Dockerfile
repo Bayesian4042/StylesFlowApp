@@ -13,7 +13,7 @@ RUN uv sync --frozen --no-cache
 # RUN /app/.venv/bin/aerich migrate
 # RUN /app/.venv/bin/aerich upgrade
 
-EXPOSE 8000
+EXPOSE 8001
 
 # Run the application.
 CMD ["/app/.venv/bin/fastapi", "run"]

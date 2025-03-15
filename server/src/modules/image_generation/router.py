@@ -7,13 +7,16 @@ import aiohttp
 from .service import generate_image, ImageGenerationResult, virtual_try_on_with_fal
 from ...config import settings
 
+
 async def fetch_image(url: str) -> bytes:
     """Fetch image from URL and return bytes"""
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             return await response.read()
 
+
 router = APIRouter(prefix="/image-generation", tags=["image-generation"])
+
 
 @router.get("/view-image")
 async def view_image(url: str):
@@ -42,12 +45,14 @@ class ImageGenerationRequest(BaseModel):
     aspect_ratio: Optional[str] = Field(None, description="Aspect ratio for the generated image (Kling only)")
     guidance: Optional[float] = Field(3.5, description="Guidance scale for Replicate flux-dev model", ge=1.0, le=20.0)
 
+
 class VirtualTryOnRequest(BaseModel):
     """
     Request model for virtual try-on
     """
     human_image_url: str = Field(..., description="URL of the person image")
     garment_image_url: str = Field(..., description="URL of the garment image to try on")
+
 
 class ImageGenerationResponse(BaseModel):
     """
@@ -58,9 +63,10 @@ class ImageGenerationResponse(BaseModel):
     request_id: str = Field(..., description="Unique request identifier")
     data: Optional[ImageGenerationResult] = Field(None, description="Result data (null if error)")
 
+
 @router.post("/virtual-try-on", response_model=ImageGenerationResponse)
 async def virtual_try_on_endpoint(
-    request: VirtualTryOnRequest
+        request: VirtualTryOnRequest
 ) -> ImageGenerationResponse:
     """
     Perform virtual try-on with FAL.AI.
@@ -103,6 +109,7 @@ async def virtual_try_on_endpoint(
             request_id=f"vton_{int(time.time() * 1000)}_{hash(str(e)) % 10000:04d}",
             data=None
         )
+
 
 @router.post("/generate-image", response_model=ImageGenerationResponse)
 async def generate_image_endpoint(

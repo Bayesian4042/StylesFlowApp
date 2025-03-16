@@ -39,9 +39,9 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 	};
 
 	return (
-		<div className='flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-[#1a1a1f] min-h-[600px]'>
+		<div className='relative w-[600px] overflow-hidden rounded-lg bg-card min-h-[600px] transition-all duration-300'>
 			{imageUrl ? (
-				<div className='relative flex h-full w-full items-center justify-center p-4'>
+				<div className='relative w-full h-full flex items-center justify-center p-2'>
 					{isLoading && (
 						<div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50'>
 							<div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
@@ -56,7 +56,7 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 							key={imageUrl} // Force re-render when URL changes
 							src={imageUrl}
 							alt='Generated image'
-							className='w-auto h-auto max-w-full max-h-[600px] rounded-lg object-contain'
+							className='max-w-[95%] max-h-[580px] rounded-lg object-contain'
 							onLoad={handleImageLoad}
 							onError={handleImageError}
 							crossOrigin="anonymous"
@@ -64,7 +64,7 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 					)}
 				</div>
 			) : (
-				<div className='p-4 text-center text-gray-500'>
+				<div className='absolute inset-0 flex flex-col items-center justify-center text-center text-gray-500'>
 					<svg
 						xmlns='http://www.w3.org/2000/svg'
 						width='48'

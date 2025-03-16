@@ -41,7 +41,7 @@ export default function ModelSettings({
           >
             <div className={cn(
               "w-3 h-3 rounded-full border-2",
-              gender === 'male' ? "border-[#4caf50]" : "border-muted-foreground"
+              gender === 'male' ? "border-primary" : "border-muted-foreground"
             )} />
             <span>Male</span>
           </button>
@@ -54,7 +54,7 @@ export default function ModelSettings({
           >
             <div className={cn(
               "w-3 h-3 rounded-full border-2",
-              gender === 'female' ? "border-[#4caf50]" : "border-muted-foreground"
+              gender === 'female' ? "border-primary" : "border-muted-foreground"
             )} />
             <span>Female</span>
           </button>
@@ -74,7 +74,7 @@ export default function ModelSettings({
           >
             <div className={cn(
               "w-3 h-3 rounded-full border-2",
-              age === 'children' ? "border-[#4caf50]" : "border-muted-foreground"
+              age === 'children' ? "border-primary" : "border-muted-foreground"
             )} />
             <span>Children</span>
           </button>
@@ -87,7 +87,7 @@ export default function ModelSettings({
           >
             <div className={cn(
               "w-3 h-3 rounded-full border-2",
-              age === 'youth' ? "border-[#4caf50]" : "border-muted-foreground"
+              age === 'youth' ? "border-primary" : "border-muted-foreground"
             )} />
             <span>Youth</span>
           </button>
@@ -100,7 +100,7 @@ export default function ModelSettings({
           >
             <div className={cn(
               "w-3 h-3 rounded-full border-2",
-              age === 'elderly' ? "border-[#4caf50]" : "border-muted-foreground"
+              age === 'elderly' ? "border-primary" : "border-muted-foreground"
             )} />
             <span>Elderly</span>
           </button>
@@ -115,28 +115,28 @@ export default function ModelSettings({
             onClick={() => onSkinToneChange('light')}
             className={cn(
               "w-6 h-6 rounded-full bg-[#F6EBE1]",
-              skinTone === 'light' ? "ring-2 ring-[#4caf50] ring-offset-1 ring-offset-background" : ""
+              skinTone === 'light' ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""
             )}
           />
           <button
             onClick={() => onSkinToneChange('medium')}
             className={cn(
               "w-6 h-6 rounded-full bg-[#D4A373]",
-              skinTone === 'medium' ? "ring-2 ring-[#4caf50] ring-offset-1 ring-offset-background" : ""
+              skinTone === 'medium' ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""
             )}
           />
           <button
             onClick={() => onSkinToneChange('dark')}
             className={cn(
               "w-6 h-6 rounded-full bg-[#8B4513]",
-              skinTone === 'dark' ? "ring-2 ring-[#4caf50] ring-offset-1 ring-offset-background" : ""
+              skinTone === 'dark' ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""
             )}
           />
           <button
             onClick={() => onSkinToneChange('very-dark')}
             className={cn(
               "w-6 h-6 rounded-full bg-[#3E2723]",
-              skinTone === 'very-dark' ? "ring-2 ring-[#4caf50] ring-offset-1 ring-offset-background" : ""
+              skinTone === 'very-dark' ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""
             )}
           />
         </div>

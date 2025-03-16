@@ -14,16 +14,16 @@ export function NavigationTabs({ onTabChange, activeTab }: NavigationTabsProps) 
       onValueChange={onTabChange}
       className="w-full"
     >
-      <TabsList className="w-full bg-[#1C1F24] p-1 rounded-lg">
+      <TabsList className="w-full bg-card p-1 rounded-lg">
         <TabsTrigger
           value="ai-model"
-          className="w-1/2 data-[state=active]:bg-[#4CAF50] data-[state=active]:text-white rounded-md py-3"
+          className="w-1/2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md py-3"
         >
           AI Model
         </TabsTrigger>
         <TabsTrigger
           value="virtual-tryon"
-          className="w-1/2 data-[state=active]:bg-[#4CAF50] data-[state=active]:text-white rounded-md py-3"
+          className="w-1/2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md py-3"
         >
           Virtual Try On
         </TabsTrigger>

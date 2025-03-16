@@ -14,7 +14,7 @@ export default function PromptInput({ value, onChange, modelSettings }: PromptIn
 	const [hints] = useState(['Succulent Plants', 'B&W Female Portrait']);
 
 	return (
-		<div className='border-b border-gray-800 p-4 relative z-10'>
+		<div className='border-b border-border p-4 relative z-10'>
 			<div className='mb-4 flex items-center gap-2'>
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
@@ -26,7 +26,7 @@ export default function PromptInput({ value, onChange, modelSettings }: PromptIn
 					strokeWidth='2'
 					strokeLinecap='round'
 					strokeLinejoin='round'
-					className='text-[#4caf50]'
+					className='text-primary'
 				>
 					<circle cx='12' cy='12' r='10' />
 					<line x1='12' x2='12' y1='16' y2='12' />
@@ -35,21 +35,21 @@ export default function PromptInput({ value, onChange, modelSettings }: PromptIn
 				<h2 className='text-sm font-medium'>Prompt</h2>
 			</div>
 
-			<div className='mb-4 rounded-lg bg-[#1a1a1f] p-4 relative'>
+			<div className='mb-4 rounded-lg bg-card p-4 relative'>
 				<textarea
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-					className='h-24 w-full resize-none border-none bg-transparent text-gray-300 focus:outline-none relative z-10'
+					className='h-24 w-full resize-none border-none bg-transparent text-foreground focus:outline-none relative z-10'
 					placeholder='Please describe how you want to your AI model such as pose, background, etc.'
 				/>
 				{modelSettings && (
-					<div className='mt-2 text-sm text-gray-500'>
+					<div className='mt-2 text-sm text-muted-foreground'>
 						Will be appended: {modelSettings}
 					</div>
 				)}
-				<div className='mt-2 text-xs text-gray-500'>
+				<div className='mt-2 text-xs text-muted-foreground'>
 					<span>or view </span>
-					<a href='#' className='text-[#4caf50]'>
+					<a href='#' className='text-primary'>
 						Help Center
 					</a>
 					<span> for a quick start.</span>
@@ -63,13 +63,13 @@ export default function PromptInput({ value, onChange, modelSettings }: PromptIn
             <Button
               key={index}
               variant="outline"
-              className="text-xs py-1 h-auto border-gray-700 bg-[#1a1a1f] hover:bg-[#252529] text-gray-300"
+              className="text-xs py-1 h-auto border-border bg-card hover:bg-accent text-foreground"
             >
               {hint}
             </Button>
           ))}
-          <Button variant="outline" size="icon" className="h-6 w-6 border-gray-700 bg-[#1a1a1f] hover:bg-[#252529]">
-            <RefreshCcw className="h-3 w-3 text-gray-400" />
+          <Button variant="outline" size="icon" className="h-6 w-6 border-border bg-card hover:bg-accent">
+            <RefreshCcw className="h-3 w-3 text-muted-foreground" />
           </Button>
         </div> */}
 			</div>

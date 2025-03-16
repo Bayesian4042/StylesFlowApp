@@ -135,7 +135,8 @@ export default function AIVirtualTryOn() {
             <div className="space-y-2">
               {activeTab === 'ai-model' ? (
                 <Button 
-                  className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white relative z-50"
+                  className="w-full relative z-50"
+                  variant="default"
                   onClick={handleGenerateClick}
                   disabled={isGenerating}
                 >
@@ -143,7 +144,8 @@ export default function AIVirtualTryOn() {
                 </Button>
               ) : (
                 <Button 
-                  className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white relative z-50"
+                  className="w-full relative z-50"
+                  variant="default"
                   onClick={async () => {
                     if (!generatedImage || !garmentImage) {
                       setError('Both model and garment images are required');
@@ -191,9 +193,9 @@ export default function AIVirtualTryOn() {
       </div>
 
       {/* Preview Area */}
-      <div className='flex-1 z-0 w-full'>
+      <div className='flex-1 z-0 overflow-hidden transition-all duration-300'>
         {activeTab === 'ai-model' ? (
-          <div className='grid grid-cols-2 gap-4 p-4 h-full w-full'>
+          <div className='grid grid-cols-2 gap-4 p-4 h-full w-full max-w-[1600px] mx-auto transition-all duration-300 md:group-data-[collapsible=icon]:max-w-[calc(100vw-64px)]'>
             {/* AI Model Preview */}
             <div className='h-full w-full'>
               <div className='mb-2 text-sm font-medium text-muted-foreground'>AI Model Preview</div>
@@ -207,8 +209,8 @@ export default function AIVirtualTryOn() {
             </div>
           </div>
         ) : (
-          <div className='p-4 h-full w-full'>
-            <div className='grid grid-cols-2 gap-4 h-full w-full'>
+          <div className='p-4 h-full w-full overflow-hidden transition-all duration-300'>
+            <div className='grid grid-cols-2 gap-4 h-full w-full max-w-[1600px] mx-auto transition-all duration-300 md:group-data-[collapsible=icon]:max-w-[calc(100vw-64px)]'>
               {/* Try-on Preview */}
               <div className='h-full w-full'>
                 <div className='mb-2 text-sm font-medium text-muted-foreground'>Try-on Preview</div>

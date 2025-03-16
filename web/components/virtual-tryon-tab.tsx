@@ -109,7 +109,8 @@ export default function VirtualTryOnTab({ onTabChange, generatedImage }: Virtual
         <div className="p-4 border-t border-border transition-opacity duration-300 md:group-data-[collapsible=icon]:opacity-0">
           <div className="space-y-2">
             <Button 
-              className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full"
+              variant="default"
               onClick={handleTryOn}
               disabled={isLoading || !generatedImage || !garmentImage}
             >

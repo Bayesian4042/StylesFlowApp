@@ -93,7 +93,7 @@ export default function ReferenceUpload({ onImagesChange, onTabChange, generated
 		<div>
 			<div className='mb-4 flex items-center justify-between'>
 				<div className='flex items-center gap-2'>
-					<Upload className='h-5 w-5 text-[#4caf50]' />
+					<Upload className='h-5 w-5 text-primary' />
 					<h2 className='text-sm font-medium'>Upload {type === 'human' ? 'Human' : 'Garment'} Image</h2>
 				</div>
 			</div>
@@ -114,7 +114,7 @@ export default function ReferenceUpload({ onImagesChange, onTabChange, generated
 				</div>
 			) : (
 				<div
-					className={`border border-dashed ${isDragging && activeUpload === type ? 'border-[#4caf50]' : 'border-gray-700'} rounded-lg bg-[#1a1a1f] p-4 text-center cursor-pointer`}
+					className={`border border-dashed ${isDragging && activeUpload === type ? 'border-primary' : 'border-gray-700'} rounded-lg bg-card p-4 text-center cursor-pointer`}
 					onDragOver={handleDragOver}
 					onDragLeave={handleDragLeave}
 					onDrop={handleDrop}
@@ -129,9 +129,9 @@ export default function ReferenceUpload({ onImagesChange, onTabChange, generated
 					/>
 					<label htmlFor={`${type}-upload`} className='cursor-pointer'>
 						<div className='flex flex-col items-center gap-2'>
-							<Upload className='h-5 w-5 text-[#4caf50]' />
+							<Upload className='h-5 w-5 text-primary' />
 							<div className='text-sm'>
-								<span className='text-[#4caf50]'>Click / Drop / Paste</span>
+								<span className='text-primary'>Click / Drop / Paste</span>
 							</div>
 							<div className='text-xs text-gray-500'>Support JPG/PNG Files</div>
 						</div>
@@ -146,12 +146,12 @@ export default function ReferenceUpload({ onImagesChange, onTabChange, generated
 			{/* Human Image Section */}
 			<div className="space-y-4">
 				<div className="flex items-center gap-2">
-					<div className="h-6 w-6 rounded-full bg-[#4caf50] flex items-center justify-center text-white">
+					<div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
 						<span className="text-sm">1</span>
 					</div>
 					<h2 className="text-sm font-medium">Select a Model</h2>
 				</div>
-				<div className="aspect-[3/4] bg-[#1a1a1f] rounded-lg overflow-hidden">
+				<div className="aspect-[3/4] bg-card rounded-lg overflow-hidden">
 					{generatedImage ? (
 						<div className="relative h-full w-full group">
 							<img 
@@ -170,7 +170,7 @@ export default function ReferenceUpload({ onImagesChange, onTabChange, generated
 						</div>
 					) : (
 						<div 
-							className="h-full w-full flex items-center justify-center cursor-pointer hover:bg-[#2a2a2f] transition-colors"
+							className="h-full w-full flex items-center justify-center cursor-pointer hover:bg-accent transition-colors"
 							onClick={() => onTabChange('ai-model')}
 						>
 							<Button
@@ -191,7 +191,7 @@ export default function ReferenceUpload({ onImagesChange, onTabChange, generated
 			{/* Garment Image Section */}
 			<div className="mt-8">
 				<div className="flex items-center gap-2 mb-4">
-					<div className="h-6 w-6 rounded-full bg-[#4caf50] flex items-center justify-center text-white">
+					<div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
 						<span className="text-sm">2</span>
 					</div>
 					<h2 className="text-sm font-medium">Upload a Garment Image</h2>
@@ -211,7 +211,7 @@ export default function ReferenceUpload({ onImagesChange, onTabChange, generated
 								{DEFAULT_GARMENTS.map((garment) => (
 									<div 
 										key={garment.id}
-										className={`group relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all ${garmentImage === garment.src ? 'ring-2 ring-[#4caf50]' : 'hover:ring-2 hover:ring-[#4caf50]'}`}
+										className={`group relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-all ${garmentImage === garment.src ? 'ring-2 ring-primary' : 'hover:ring-2 hover:ring-primary'}`}
 										onClick={() => handleSelectGarment(garment.src)}
 									>
 										<img src={garment.src} alt={garment.name} className="w-full h-full object-cover" />

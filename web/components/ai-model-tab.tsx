@@ -2,6 +2,8 @@
 
 import ModelSettings from '@/components/model-settings';
 import PromptInput from '@/components/prompt-input';
+import ImageUploader from '@/components/image-uploader';
+import { Button } from '@/components/ui/button';
 import { useState, useEffect, useCallback } from 'react';
 import { ApiClient } from '@/lib/api-client';
 
@@ -11,6 +13,12 @@ interface GenerateImageResponse {
   data: {
     images: string[];
   };
+}
+
+interface GenerateImageRequest {
+  prompt: string;
+  modelSettings: string;
+  clothImage?: string | null;
 }
 
 interface AIModelTabProps {
@@ -38,6 +46,28 @@ export default function AIModelTab({
 }: AIModelTabProps) {
 
   const modelSettings = `${gender}, ${age}, ${skinTone} skin tone`;
+  const [clothImage, setClothImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGenerateImage = useCallback(async () => {
+    if (!prompt) return;
+    
+    setIsLoading(true);
+    try {
+      const payload: GenerateImageRequest = {
+        prompt,
+        modelSettings,
+        clothImage
+      };
+      
+      const response = await ApiClient.post<GenerateImageResponse>('/api/generate', payload);
+      // Handle the response as needed
+    } catch (error) {
+      console.error('Error generating image:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [prompt, modelSettings, clothImage]);
 
   return (
     <div className="relative z-10">
@@ -49,6 +79,23 @@ export default function AIModelTab({
         onAgeChange={onAgeChange}
         onSkinToneChange={onSkinToneChange}
       />
+      <div className="border-t border-border p-4">
+        <ImageUploader 
+          singleImage={true}
+          onImageUpload={setClothImage}
+        />
+        {clothImage && (
+          <div className="mt-4">
+            <Button 
+              onClick={handleGenerateImage}
+              disabled={!prompt || isLoading}
+              className="w-full"
+            >
+              {isLoading ? 'Generating...' : 'Generate Image'}
+            </Button>
+          </div>
+        )}
+      </div>
       <PromptInput 
         value={prompt}
         onChange={onPromptChange}

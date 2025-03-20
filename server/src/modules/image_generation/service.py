@@ -15,6 +15,7 @@ from src.external_services.fal import (
     virtual_try_on,
     FalVirtualTryOnRequest,
 )
+from src.external_services.openai import analyze_image
 
 class ImageGenerationResult(BaseModel):
     """
@@ -64,6 +65,7 @@ async def virtual_try_on_with_fal(
 async def generate_image(
     prompt: str,
     provider: str,
+    garment_image_url: Optional[str] = None,
     model: Optional[str] = None,
     num_images: Optional[int] = 1,
     width: Optional[int] = 1024,
@@ -80,10 +82,20 @@ async def generate_image(
     try:
         current_time = int(time.time() * 1000)  # Convert to milliseconds
 
+        # Get garment description from OpenAI if image URL is provided
+        enhanced_prompt = prompt
+        if garment_image_url:
+            try:
+                description = await analyze_image(garment_image_url)
+                enhanced_prompt = f"{prompt}, wearing {description}"
+            except Exception as e:
+                # Log the error but continue with original prompt
+                print(f"Warning: Failed to analyze garment image: {str(e)}")
+
         if provider.lower() == "kling":
             # Use Kling AI service
             request = KlingImageRequest(
-                prompt=prompt,
+                prompt=enhanced_prompt,
                 n=num_images,
                 size=f"{width}x{height}",
                 negative_prompt=negative_prompt,
@@ -106,7 +118,7 @@ async def generate_image(
             
             # Use Replicate service with flux-dev model
             request = ReplicateImageRequest(
-                prompt=prompt,
+                prompt=enhanced_prompt,
                 guidance=guidance,
                 num_outputs=num_images
             )

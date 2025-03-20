@@ -11,6 +11,23 @@ async function fetchImageAsBase64(url: string): Promise<string> {
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json();
+		
+		// If garment_image_url is a blob URL, convert it to base64
+		if (body.garment_image_url?.startsWith('blob:')) {
+			try {
+				body.garment_image_url = await fetchImageAsBase64(body.garment_image_url);
+			} catch (error) {
+				console.error('Error converting blob to base64:', error);
+				return NextResponse.json(
+					{
+						code: 400,
+						message: 'Failed to process garment image',
+						data: null,
+					},
+					{ status: 400 }
+				);
+			}
+		}
 
 		const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/image-generation/generate-image`, {
 			method: 'POST',

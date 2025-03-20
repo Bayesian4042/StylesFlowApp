@@ -40,6 +40,7 @@ class ImageGenerationRequest(BaseModel):
     Request model for image generation
     """
     prompt: str = Field(..., description="Text description of the image to generate")
+    garment_image_url: Optional[str] = Field(None, description="URL of the garment image to analyze")
     provider: str = Field(..., description="Image generation provider (kling or replicate)")
     model: Optional[str] = Field(None, description="Model to use (for replicate, only 'flux-dev' is supported)")
     num_images: Optional[int] = Field(1, description="Number of images to generate", ge=1, le=10)
@@ -137,6 +138,7 @@ async def generate_image_endpoint(
     try:
         result = await generate_image(
             prompt=request.prompt,
+            garment_image_url=request.garment_image_url,
             provider=request.provider,
             model=request.model,
             num_images=request.num_images,

@@ -16,6 +16,7 @@ ALLOWED_HOSTS: List[str] = ["*"]
 
 ENV: str = config.get("ENV", "development")
 KLING_API_KEY: str = config.get("KLING_API_KEY", "")
+OPENAI_API_KEY: str = config.get("OPENAI_API_KEY", "")
 REPLICATE_API_TOKEN: str = config.get("REPLICATE_API_TOKEN", "")
 FAL_API_KEY: str = config.get("FAL_API_KEY", "")
 DATABASE_URL: str = config.get("DATABASE_URL", "sqlite://db.sqlite3")

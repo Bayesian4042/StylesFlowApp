@@ -31,6 +31,7 @@ interface AIModelTabProps {
   onGenderChange: (gender: string) => void;
   onAgeChange: (age: string) => void;
   onSkinToneChange: (skinTone: string) => void;
+  onGarmentImageChange: (image: string | null) => void;
 }
 
 export default function AIModelTab({ 
@@ -42,32 +43,15 @@ export default function AIModelTab({
   skinTone,
   onGenderChange,
   onAgeChange,
-  onSkinToneChange
+  onSkinToneChange,
+  onGarmentImageChange
 }: AIModelTabProps) {
 
   const modelSettings = `${gender}, ${age}, ${skinTone} skin tone`;
-  const [clothImage, setClothImage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleGenerateImage = useCallback(async () => {
-    if (!prompt) return;
-    
-    setIsLoading(true);
-    try {
-      const payload: GenerateImageRequest = {
-        prompt,
-        modelSettings,
-        clothImage
-      };
-      
-      const response = await ApiClient.post<GenerateImageResponse>('/api/generate', payload);
-      // Handle the response as needed
-    } catch (error) {
-      console.error('Error generating image:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [prompt, modelSettings, clothImage]);
+  const handleGarmentUpload = (image: string | null) => {
+    onGarmentImageChange(image);
+  };
 
   return (
     <div className="relative z-10">
@@ -80,21 +64,13 @@ export default function AIModelTab({
         onSkinToneChange={onSkinToneChange}
       />
       <div className="border-t border-border p-4">
-        <ImageUploader 
-          singleImage={true}
-          onImageUpload={setClothImage}
-        />
-        {clothImage && (
-          <div className="mt-4">
-            <Button 
-              onClick={handleGenerateImage}
-              disabled={!prompt || isLoading}
-              className="w-full"
-            >
-              {isLoading ? 'Generating...' : 'Generate Image'}
-            </Button>
-          </div>
-        )}
+        <div className="mb-4">
+          <p className="text-sm font-medium text-muted-foreground mb-2">Upload Garment Image</p>
+          <ImageUploader 
+            singleImage={true}
+            onImageUpload={handleGarmentUpload}
+          />
+        </div>
       </div>
       <PromptInput 
         value={prompt}

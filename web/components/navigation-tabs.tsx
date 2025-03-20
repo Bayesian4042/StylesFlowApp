@@ -17,15 +17,9 @@ export function NavigationTabs({ onTabChange, activeTab }: NavigationTabsProps) 
       <TabsList className="w-full bg-card p-1 rounded-lg">
         <TabsTrigger
           value="ai-model"
-          className="w-1/2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md py-3"
+          className="w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md py-3"
         >
           AI Model
-        </TabsTrigger>
-        <TabsTrigger
-          value="virtual-tryon"
-          className="w-1/2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md py-3"
-        >
-          Virtual Try On
         </TabsTrigger>
       </TabsList>
     </Tabs>

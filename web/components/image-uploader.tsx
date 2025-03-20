@@ -21,10 +21,19 @@ export default function ImageUploader({ singleImage = false, onImageUpload }: Im
 		}
 	}, [uploadedImages, onImageUpload]);
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const convertToBase64 = (file: File): Promise<string> => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = () => resolve(reader.result as string);
+			reader.onerror = error => reject(error);
+		});
+	};
+
+	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files && e.target.files.length > 0) {
 			const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
-			const newImages = files.map((file) => URL.createObjectURL(file));
+			const newImages = await Promise.all(files.map(convertToBase64));
 			
 			if (singleImage) {
 				// Clear previous images and only use the latest one
@@ -48,13 +57,13 @@ export default function ImageUploader({ singleImage = false, onImageUpload }: Im
 		setIsDragging(false);
 	};
 
-	const handleDrop = (e: React.DragEvent) => {
+	const handleDrop = async (e: React.DragEvent) => {
 		e.preventDefault();
 		setIsDragging(false);
 
 		if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
 			const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
-			const newImages = files.map((file) => URL.createObjectURL(file));
+			const newImages = await Promise.all(files.map(convertToBase64));
 			
 			if (singleImage) {
 				// Clear previous images and only use the latest one

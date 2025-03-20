@@ -27,6 +27,17 @@ services:
     restart: unless-stopped
     networks:
       - app_network
+  
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - app_network
+    restart: unless-stopped
 
 networks:
   app_network:

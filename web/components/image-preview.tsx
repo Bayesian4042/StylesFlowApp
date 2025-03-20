@@ -39,7 +39,7 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 	};
 
 	return (
-		<div className='relative w-[600px] overflow-hidden rounded-lg bg-card min-h-[600px] transition-all duration-300'>
+		<div className='relative w-full h-full overflow-hidden rounded-lg bg-card transition-all duration-300'>
 			{imageUrl ? (
 				<div className='relative w-full h-full flex items-center justify-center p-2'>
 					{isLoading && (
@@ -56,7 +56,7 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 							key={imageUrl} // Force re-render when URL changes
 							src={imageUrl}
 							alt='Generated image'
-							className='max-w-[95%] max-h-[580px] rounded-lg object-contain'
+							className='max-w-full max-h-full rounded-lg object-contain'
 							onLoad={handleImageLoad}
 							onError={handleImageError}
 							crossOrigin="anonymous"

@@ -29,7 +29,7 @@ export default async function RootLayout({
 						<SidebarProvider>
 							<div className='group/sidebar flex h-screen overflow-hidden bg-background'>
 								<NavSidebar />
-								<main className='flex-1 overflow-auto transition-all duration-300 group-data-[collapsible=icon]/sidebar:pl-[48px]'>
+								<main className='flex-1 overflow-x-hidden overflow-y-auto transition-all duration-300 group-data-[collapsible=icon]/sidebar:pl-[48px]'>
 									{children}
 								</main>
 							</div>

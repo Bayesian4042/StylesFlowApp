@@ -49,9 +49,25 @@ export default function AIModelTab({
 
   const modelSettings = `${gender}, ${age}, ${skinTone} skin tone`;
 
-  const handleGarmentUpload = (image: string | null) => {
-    onGarmentImageChange(image);
-  };
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const handleGarmentUpload = useCallback((image: string | null) => {
+    console.log('Received image in handleGarmentUpload:', image ? 'Image present' : 'No image');
+    try {
+      if (image) {
+        console.log('Valid image received, updating state');
+        onGarmentImageChange(image);
+        setLocalError(null);
+      } else {
+        console.log('No image received or image removed');
+        onGarmentImageChange(null);
+      }
+    } catch (error) {
+      console.error('Error in handleGarmentUpload:', error);
+      setLocalError(error instanceof Error ? error.message : 'Failed to process image');
+      onGarmentImageChange(null);
+    }
+  }, [onGarmentImageChange]);
 
   return (
     <div className="relative z-10">
@@ -77,8 +93,8 @@ export default function AIModelTab({
         onChange={onPromptChange}
         modelSettings={modelSettings}
       />
-      {error && (
-        <p className="text-sm text-destructive p-4 border-t border-border">{error}</p>
+      {(error || localError) && (
+        <p className="text-sm text-destructive p-4 border-t border-border">{error || localError}</p>
       )}
     </div>
   );

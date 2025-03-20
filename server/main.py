@@ -61,7 +61,7 @@ app.include_router(user_router, prefix=settings.API_V1_PREFIX)
 app.include_router(image_generation_router, prefix=settings.API_V1_PREFIX)
 
 
-@app.get("/")
+@app.get("/api/")
 async def root():
     """
     Root endpoint that redirects to the API documentation.
@@ -71,7 +71,7 @@ async def root():
     return RedirectResponse(url="/docs")
 
 
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
     """
     Health check endpoint to verify the API is running.

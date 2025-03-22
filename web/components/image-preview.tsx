@@ -68,7 +68,7 @@ export default function ImagePreview({
 							key={imageUrl} // Force re-render when URL changes
 							src={imageUrl}
 							alt='Generated image'
-							className='max-w-full h-auto max-h-[200px] rounded-lg object-contain'
+							className='max-w-full h-auto max-h-[520px] rounded-lg object-contain'
 							onLoad={handleImageLoad}
 							onError={handleImageError}
 							crossOrigin="anonymous"

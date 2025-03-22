@@ -6,9 +6,20 @@ import Image from 'next/image';
 interface ImagePreviewProps {
 	imageUrl: string | null;
 	previewType?: 'ai-model' | 'cloth-overlay';
+	onOverlayClick?: () => void;
+	isGenerating?: boolean;
+	garmentImage?: string | null;
+	showOverlayButton?: boolean;
 }
 
-export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: ImagePreviewProps) {
+export default function ImagePreview({ 
+	imageUrl, 
+	previewType = 'ai-model',
+	onOverlayClick,
+	isGenerating,
+	garmentImage,
+	showOverlayButton = false
+}: ImagePreviewProps) {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -39,9 +50,10 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 	};
 
 	return (
-		<div className='relative w-full h-full overflow-hidden rounded-lg bg-card transition-all duration-300'>
+		<div className='relative w-full h-full overflow-hidden rounded-lg bg-card transition-all duration-300 border border-border'>
 			{imageUrl ? (
-				<div className='relative w-full h-full flex items-center justify-center p-2'>
+				<>
+				<div className='relative w-full h-[calc(100%-48px)] flex items-center justify-center p-2 bg-background'>
 					{isLoading && (
 						<div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50'>
 							<div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
@@ -56,13 +68,25 @@ export default function ImagePreview({ imageUrl, previewType = 'ai-model' }: Ima
 							key={imageUrl} // Force re-render when URL changes
 							src={imageUrl}
 							alt='Generated image'
-							className='max-w-full max-h-full rounded-lg object-contain'
+							className='max-w-full h-auto max-h-[200px] rounded-lg object-contain'
 							onLoad={handleImageLoad}
 							onError={handleImageError}
 							crossOrigin="anonymous"
 						/>
 					)}
 				</div>
+				{showOverlayButton && previewType === 'ai-model' && (
+					<div className="absolute bottom-0 left-0 right-0 h-[48px] px-4 py-2 border-t border-border bg-card">
+						<button
+							className="w-full px-4 py-2 text-sm font-medium text-center bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+							onClick={onOverlayClick}
+							disabled={isGenerating || !garmentImage}
+						>
+							{isGenerating ? "Processing..." : "Overlay Garment"}
+						</button>
+					</div>
+				)}
+				</>
 			) : (
 				<div className='absolute inset-0 flex flex-col items-center justify-center text-center text-gray-500'>
 					<svg

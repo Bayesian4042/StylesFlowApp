@@ -38,6 +38,7 @@ export default function AIVirtualTryOn() {
   const [skinTone, setSkinTone] = useState('light');
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [garmentImage, setGarmentImage] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState('leffa');
 
   const handleGarmentImageChange = useCallback((image: string | null) => {
     console.log('handleGarmentImageChange called with:', image ? 'Image present' : 'No image');
@@ -127,6 +128,8 @@ export default function AIVirtualTryOn() {
               onAgeChange={setAge}
               onSkinToneChange={setSkinTone}
               onGarmentImageChange={handleGarmentImageChange}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
             />
           </div>
           
@@ -141,10 +144,23 @@ export default function AIVirtualTryOn() {
               >
                 {isGenerating ? "Generating..." : "Generate"}
               </Button>
-              <Button 
-                className="w-full"
-                variant="default"
-                onClick={async () => {
+              {error && (
+                <p className="text-sm text-destructive text-center">{error}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Preview Area */}
+        <div className='flex-1 flex flex-col gap-6 p-6 overflow-y-auto'>
+          {/* AI Model Preview */}
+          <div className='w-full md:w-[800px] h-[600px]'>
+            <div className='mb-2 text-sm font-medium text-muted-foreground'>AI Model Preview</div>
+            <div className='h-[calc(100%-28px)]'>
+              <ImagePreview 
+                imageUrl={generatedImage} 
+                previewType="ai-model"
+                onOverlayClick={async () => {
                   if (!generatedImage || !garmentImage) {
                     setError('Both model and garment images are required');
                     return;
@@ -156,7 +172,8 @@ export default function AIVirtualTryOn() {
                   try {
                     const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
                       human_image_url: generatedImage,
-                      garment_image_url: garmentImage
+                      garment_image_url: garmentImage,
+                      model: selectedModel
                     });
 
                     if (result.error) {
@@ -176,31 +193,17 @@ export default function AIVirtualTryOn() {
                     setIsGenerating(false);
                   }
                 }}
-                disabled={isGenerating || !generatedImage || !garmentImage}
-              >
-                {isGenerating ? "Processing..." : "Overlay Garment"}
-              </Button>
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Preview Area */}
-        <div className='flex-1 flex flex-col gap-6 p-6 overflow-y-auto'>
-          {/* AI Model Preview */}
-          <div className='w-full md:w-[800px] h-[280px]'>
-            <div className='mb-1 text-sm font-medium text-muted-foreground'>AI Model Preview</div>
-            <div className='h-[calc(100%-20px)]'>
-              <ImagePreview imageUrl={generatedImage} previewType="ai-model" />
+                isGenerating={isGenerating}
+                garmentImage={garmentImage}
+                showOverlayButton={true}
+              />
             </div>
           </div>
           
           {/* Cloth Overlay Preview */}
-          <div className='w-full md:w-[800px] h-[280px]'>
-            <div className='mb-1 text-sm font-medium text-muted-foreground'>Cloth Overlay Preview</div>
-            <div className='h-[calc(100%-20px)]'>
+          <div className='w-full md:w-[800px] h-[600px]'>
+            <div className='mb-2 text-sm font-medium text-muted-foreground'>Cloth Overlay Preview</div>
+            <div className='h-[calc(100%-28px)]'>
               <ImagePreview imageUrl={overlayImage} previewType="cloth-overlay" />
             </div>
           </div>
@@ -223,6 +226,8 @@ export default function AIVirtualTryOn() {
               onAgeChange={setAge}
               onSkinToneChange={setSkinTone}
               onGarmentImageChange={handleGarmentImageChange}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
             />
           </div>
           
@@ -237,45 +242,6 @@ export default function AIVirtualTryOn() {
               >
                 {isGenerating ? "Generating..." : "Generate"}
               </Button>
-              <Button 
-                className="w-full"
-                variant="default"
-                onClick={async () => {
-                  if (!generatedImage || !garmentImage) {
-                    setError('Both model and garment images are required');
-                    return;
-                  }
-
-                  setError(null);
-                  setIsGenerating(true);
-
-                  try {
-                    const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
-                      human_image_url: generatedImage,
-                      garment_image_url: garmentImage
-                    });
-
-                    if (result.error) {
-                      throw new Error(result.error.message);
-                    }
-
-                    if (result.data?.code === 0 && result.data?.data?.images?.[0]) {
-                      const imageUrl = result.data.data.images[0];
-                      setOverlayImage(imageUrl);
-                    } else {
-                      throw new Error('No valid overlay image URL was generated');
-                    }
-                  } catch (error) {
-                    setError(error instanceof Error ? error.message : 'Failed to generate overlay');
-                    setOverlayImage(null);
-                  } finally {
-                    setIsGenerating(false);
-                  }
-                }}
-                disabled={isGenerating || !generatedImage || !garmentImage}
-              >
-                {isGenerating ? "Processing..." : "Overlay Garment"}
-              </Button>
               {error && (
                 <p className="text-sm text-destructive text-center">{error}</p>
               )}
@@ -287,15 +253,54 @@ export default function AIVirtualTryOn() {
             {/* AI Model Preview */}
             <div className='mb-8'>
               <div className='mb-2 text-sm font-medium text-muted-foreground'>AI Model Preview</div>
-              <div className='w-full max-w-full aspect-[16/9]'>
-                <ImagePreview imageUrl={generatedImage} previewType="ai-model" />
+              <div className='w-full max-w-full h-[600px]'>
+                <ImagePreview 
+                  imageUrl={generatedImage} 
+                  previewType="ai-model"
+                  onOverlayClick={async () => {
+                    if (!generatedImage || !garmentImage) {
+                      setError('Both model and garment images are required');
+                      return;
+                    }
+
+                    setError(null);
+                    setIsGenerating(true);
+
+                    try {
+                    const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
+                      human_image_url: generatedImage,
+                      garment_image_url: garmentImage,
+                      model: selectedModel
+                    });
+
+                      if (result.error) {
+                        throw new Error(result.error.message);
+                      }
+
+                      if (result.data?.code === 0 && result.data?.data?.images?.[0]) {
+                        const imageUrl = result.data.data.images[0];
+                        setOverlayImage(imageUrl);
+                      } else {
+                        throw new Error('No valid overlay image URL was generated');
+                      }
+                    } catch (error) {
+                      setError(error instanceof Error ? error.message : 'Failed to generate overlay');
+                      setOverlayImage(null);
+                    } finally {
+                      setIsGenerating(false);
+                    }
+                  }}
+                  isGenerating={isGenerating}
+                  garmentImage={garmentImage}
+                  showOverlayButton={true}
+                />
               </div>
             </div>
             
             {/* Cloth Overlay Preview */}
             <div>
               <div className='mb-2 text-sm font-medium text-muted-foreground'>Cloth Overlay Preview</div>
-              <div className='w-full max-w-full aspect-[16/9]'>
+              <div className='w-full max-w-full h-[600px]'>
                 <ImagePreview imageUrl={overlayImage} previewType="cloth-overlay" />
               </div>
             </div>

@@ -180,9 +180,9 @@ export default function AIVirtualTryOn() {
                       throw new Error(result.error.message);
                     }
 
-                    if (result.data?.code === 0 && result.data?.data?.images?.[0]) {
-                      const imageUrl = result.data.data.images[0];
-                      setOverlayImage(imageUrl);
+                    if (result.data?.code === 0 && result.data?.data?.images?.length > 0) {
+                      // For cat-vton and other models, use first image from the list
+                      setOverlayImage(result.data.data.images[0]);
                     } else {
                       throw new Error('No valid overlay image URL was generated');
                     }
@@ -277,9 +277,9 @@ export default function AIVirtualTryOn() {
                         throw new Error(result.error.message);
                       }
 
-                      if (result.data?.code === 0 && result.data?.data?.images?.[0]) {
-                        const imageUrl = result.data.data.images[0];
-                        setOverlayImage(imageUrl);
+                      if (result.data?.code === 0 && result.data?.data?.images?.length > 0) {
+                        // For cat-vton and other models, use first image from the list
+                        setOverlayImage(result.data.data.images[0]);
                       } else {
                         throw new Error('No valid overlay image URL was generated');
                       }

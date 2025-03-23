@@ -1,96 +1,15 @@
-"""
-FastAPI Template Application
-This is a template for FastAPI applications following best practices.
-"""
-import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException
-from starlette.responses import RedirectResponse
-from tortoise.exceptions import BaseORMException
-from contextlib import asynccontextmanager
-from dotenv import load_dotenv
-
-load_dotenv('.env')
-
-from src.config import  settings
-from src.database import init_db, close_db
-from src.modules.auth.router import router as user_router
-from src.modules.image_generation.router import router as image_generation_router
-from src.exceptions import (
-    http_exception_handler,
-    validation_exception_handler,
-    generic_exception_handler,
-    database_exception_handler,
-)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Manage application lifespan events."""
-    await init_db()
-    yield
-    await close_db()
-
-# Initialize FastAPI app
-app = FastAPI(
-    title=settings.APP_NAME,
-    version=settings.VERSION,
-    description="A template FastAPI application with best practices",
-    lifespan=lifespan
-)
-
-# Register exception handlers
-app.add_exception_handler(HTTPException, http_exception_handler)
-app.add_exception_handler(RequestValidationError, validation_exception_handler)
-app.add_exception_handler(BaseORMException, database_exception_handler)
-app.add_exception_handler(Exception, generic_exception_handler)
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_HOSTS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# Include routers with API versioning
-app.include_router(user_router, prefix=settings.API_V1_PREFIX)
-app.include_router(image_generation_router, prefix=settings.API_V1_PREFIX)
-
-
-@app.get("/api/")
-async def root():
-    """
-    Root endpoint that redirects to the API documentation.
-    Returns:
-        RedirectResponse: Redirects to the /docs endpoint
-    """
-    return RedirectResponse(url="/docs")
-
-
-@app.get("/api/health")
-async def health_check():
-    """
-    Health check endpoint to verify the API is running.
-    Returns:
-        dict: A simple message indicating the API is healthy
-    """
-    return {"version": settings.VERSION, "status": "healthy"}
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
-
-"""
 import logging
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.modules.routers import external_tryon, local_tryon
+
+from src.config import settings, constants
 import datetime
+import os
+from pathlib import Path
 from dotenv import load_dotenv
+from src.modules.image_generation.router import router as image_generation_router
+from src.modules.routers.generated_images import generated_images_router
 
 load_dotenv('.env')
 # Configure logging
@@ -126,18 +45,19 @@ app.add_middleware(
     expose_headers=["Content-Disposition"]  # For file downloads if needed
 )
 
-# Include routers with API prefix
-app.include_router(
-    local_tryon.router,
-    prefix="/api/local",
-    tags=["Local TryOn"]
-)
+# Add generated images router
+app.include_router(image_generation_router, prefix=settings.API_V1_PREFIX)
+
 
 app.include_router(
-    external_tryon.router,
-    prefix="/api/external",
-    tags=["External TryOn"]
+    generated_images_router,
+    prefix="/api",
+    tags=["Generated Images"]
 )
+
+# Ensure output directory exists at startup
+os.makedirs(constants.OUTPUT_DIR, exist_ok=True)
+print(f"Debug - Ensuring output directory exists: {constants.OUTPUT_DIR}")
 
 # Health check endpoints
 @app.get("/", include_in_schema=False)
@@ -152,7 +72,8 @@ async def health_check():
         "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
     }
 
-
-
-
-"""
+if __name__ == "__main__":
+    print(f"Starting server with output directory: {constants.OUTPUT_DIR}")
+    
+    # Run the server
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

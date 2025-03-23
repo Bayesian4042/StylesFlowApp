@@ -93,7 +93,7 @@ async def virtual_try_on_endpoint(
                 garment_image_url=request.garment_image_url,
                 api_key=settings.FAL_API_KEY
             )
-        elif request.model == 'cat-vton':
+        elif request.model.lower() == 'cat-vton':
             result = await virtual_try_on_with_catvton(
                 human_image_url=request.human_image_url,
                 garment_image_url=request.garment_image_url

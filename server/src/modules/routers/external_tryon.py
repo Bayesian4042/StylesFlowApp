@@ -4,10 +4,12 @@ import replicate
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
 from typing import List, Optional
+from dotenv import load_dotenv
+load_dotenv('.env')
 
 # Load API keys
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
-KOLORS_API_KEY = os.getenv("KOLORS_API_KEY")  # Set this in environment variables
+KOLORS_API_KEY = os.getenv("KLING_API_KEY")  # Set this in environment variables
 
 if not REPLICATE_API_TOKEN:
     raise ValueError("Missing Replicate API key. Set REPLICATE_API_TOKEN in environment variables.")

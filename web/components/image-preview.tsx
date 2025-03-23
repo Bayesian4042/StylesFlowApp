@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { apiUrl } from '@/config';
 
 interface ImagePreviewProps {
 	imageUrl: string | null;
@@ -66,7 +67,7 @@ export default function ImagePreview({
 					) : (
 						<img
 							key={imageUrl} // Force re-render when URL changes
-							src={imageUrl}
+							src={imageUrl.startsWith('http') ? imageUrl : `${apiUrl}/${imageUrl}`}
 							alt='Generated image'
 							className='max-w-full h-auto max-h-[520px] rounded-lg object-contain'
 							onLoad={handleImageLoad}

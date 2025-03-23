@@ -2,6 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from fastapi import HTTPException
 import time
+import os
 
 from src.external_services.kling import (
     generate_image_with_kling,
@@ -51,9 +52,12 @@ async def virtual_try_on_with_catvton(
         # Process with CatVTON service
         catvton_result = await catvton_virtual_try_on(catvton_request)
         
+        # For cat-vton, return just the path part - frontend will prepend NEXT_PUBLIC_API_URL
+        image_url = f"api/generated-images/{os.path.basename(catvton_result.image_path)}"
+        
         return ImageGenerationResult(
             task_id=catvton_result.task_id,
-            images=catvton_result.result_images,
+            images=[image_url],  # Return URL instead of base64 data
             status="succeed",
             created_at=current_time,
             updated_at=current_time,

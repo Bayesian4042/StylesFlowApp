@@ -58,6 +58,7 @@ class VirtualTryOnRequest(BaseModel):
     """
     human_image_url: str = Field(..., description="URL of the person image")
     garment_image_url: str = Field(..., description="URL of the garment image to try on")
+    model: str = Field(..., description="Model to use for virtual try-on (leffa, cat-vton, or kling)")
 
 
 class ImageGenerationResponse(BaseModel):
@@ -86,11 +87,23 @@ async def virtual_try_on_endpoint(
     - garment_image_url: URL of the garment to try on
     """
     try:
-        result = await virtual_try_on_with_fal(
-            human_image_url=request.human_image_url,
-            garment_image_url=request.garment_image_url,
-            api_key=settings.FAL_API_KEY
-        )
+        if request.model == 'leffa':
+            result = await virtual_try_on_with_fal(
+                human_image_url=request.human_image_url,
+                garment_image_url=request.garment_image_url,
+                api_key=settings.FAL_API_KEY
+            )
+        else:
+            # Placeholder for other models
+            current_time = int(time.time() * 1000)
+            result = ImageGenerationResult(
+                task_id=f"placeholder_{current_time}",
+                images=[request.human_image_url],  # Return original image for now
+                status="succeed",
+                created_at=current_time,
+                updated_at=current_time,
+                logs=[f"Placeholder response for {request.model} model"]
+            )
 
         request_id = f"vton_{int(time.time() * 1000)}_{hash(request.human_image_url) % 10000:04d}"
 

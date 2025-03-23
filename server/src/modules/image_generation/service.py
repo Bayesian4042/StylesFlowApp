@@ -12,8 +12,12 @@ from src.external_services.replicate import (
     ReplicateImageRequest,
 )
 from src.external_services.fal import (
-    virtual_try_on,
+    virtual_try_on as fal_virtual_try_on,
     FalVirtualTryOnRequest,
+)
+from src.external_services.catvton import (
+    virtual_try_on as catvton_virtual_try_on,
+    CatVTONRequest,
 )
 from src.external_services.openai import analyze_image
 
@@ -27,6 +31,39 @@ class ImageGenerationResult(BaseModel):
     created_at: int
     updated_at: int
     logs: Optional[List[str]] = None
+
+async def virtual_try_on_with_catvton(
+    human_image_url: str,
+    garment_image_url: str,
+) -> ImageGenerationResult:
+    """
+    Perform virtual try-on with CatVTON model
+    """
+    try:
+        current_time = int(time.time() * 1000)
+        
+        # Create request for CatVTON
+        catvton_request = CatVTONRequest(
+            human_image_url=human_image_url,
+            garment_image_url=garment_image_url,
+        )
+        
+        # Process with CatVTON service
+        catvton_result = await catvton_virtual_try_on(catvton_request)
+        
+        return ImageGenerationResult(
+            task_id=catvton_result.task_id,
+            images=catvton_result.result_images,
+            status="succeed",
+            created_at=current_time,
+            updated_at=current_time,
+            logs=catvton_result.logs
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to perform CatVTON virtual try-on: {str(e)}")
 
 async def virtual_try_on_with_fal(
     human_image_url: str,

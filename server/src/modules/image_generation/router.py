@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 import time
 import aiohttp
 
-from .service import generate_image, ImageGenerationResult, virtual_try_on_with_fal
+from .service import generate_image, ImageGenerationResult, virtual_try_on_with_fal, virtual_try_on_with_catvton
 from ...config import settings
 
 
@@ -92,6 +92,11 @@ async def virtual_try_on_endpoint(
                 human_image_url=request.human_image_url,
                 garment_image_url=request.garment_image_url,
                 api_key=settings.FAL_API_KEY
+            )
+        elif request.model == 'cat-vton':
+            result = await virtual_try_on_with_catvton(
+                human_image_url=request.human_image_url,
+                garment_image_url=request.garment_image_url
             )
         else:
             # Placeholder for other models

@@ -2,6 +2,7 @@
 
 import { User } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface ModelSettingsProps {
   gender: string;
@@ -10,6 +11,8 @@ interface ModelSettingsProps {
   onGenderChange: (value: string) => void;
   onAgeChange: (value: string) => void;
   onSkinToneChange: (value: string) => void;
+  selectedModel: string;
+  onModelChange: (model: string) => void;
 }
 
 export default function ModelSettings({ 
@@ -18,7 +21,9 @@ export default function ModelSettings({
   skinTone,
   onGenderChange,
   onAgeChange,
-  onSkinToneChange 
+  onSkinToneChange,
+  selectedModel,
+  onModelChange
 }: ModelSettingsProps) {
   return (
     <div className="p-4 space-y-5 relative">
@@ -140,6 +145,19 @@ export default function ModelSettings({
             )}
           />
         </div>
+      </div>
+      <div className="p-1 border-border">
+        <p className="text-sm font-medium text-muted-foreground mb-2">Select Model</p>
+        <Select value={selectedModel} onValueChange={onModelChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a model" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="leffa">Leffa</SelectItem>
+            <SelectItem value="cat-vton">Cat-VTON</SelectItem>
+            <SelectItem value="kling">Kling</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

@@ -87,7 +87,7 @@ async def virtual_try_on_with_fal(
         )
         
         # Perform virtual try-on
-        vton_result = await virtual_try_on(vton_request, api_key)
+        vton_result = await fal_virtual_try_on(vton_request, api_key)
 
         return ImageGenerationResult(
             task_id=vton_result.task_id,

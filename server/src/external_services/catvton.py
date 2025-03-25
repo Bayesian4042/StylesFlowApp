@@ -72,7 +72,7 @@ async def virtual_try_on(request: CatVTONRequest) -> CatVTONResponse:
     try:
         logs = ["Starting CatVTON API request"]
         
-        api_url = "https://catcontainer.delightfulglacier-e03744c7.westus3.azurecontainerapps.io/tryon"
+        api_url = "https://catcontainer.calmpebble-9c79c8f4.westus3.azurecontainerapps.io/tryon"
         
         async with aiohttp.ClientSession() as session:
             logs.append("Sending request to CatVTON API")

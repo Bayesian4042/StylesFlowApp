@@ -17,6 +17,19 @@ interface GenerateImageResponse {
   };
 }
 
+interface CampaignGenerationResponse {
+  code: number;
+  message: string;
+  request_id: string;
+  data: {
+    task_id: string;
+    campaign_content: string;
+    status: string;
+    created_at: number;
+    updated_at: number;
+  };
+}
+
 interface VirtualTryOnResponse {
   code: number;
   message: string;
@@ -45,6 +58,7 @@ export default function AIVirtualTryOn() {
   const [activeTab, setActiveTab] = useState('ai-model');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [garmentType, setGarmentType] = useState('overall');
+  const [campaignContent, setCampaignContent] = useState<string>('');
 
   const handleGarmentImageChange = useCallback((image: string | null) => {
     console.log('handleGarmentImageChange called with:', image ? 'Image present' : 'No image');
@@ -93,14 +107,46 @@ export default function AIVirtualTryOn() {
         fullPrompt = `${fullPrompt}, for ${campaignPrompt} campaign targeting ${platformsText} platforms`;
       }
 
-      const endpoint = isCampaign 
-        ? '/api/image-generation/generate-campaign'
-        : '/api/image-generation/generate-image';
+      if (isCampaign) {
+        console.log('Starting campaign generation with prompt:', campaignPrompt);
+        
+        // Handle campaign generation
+        const result = await ApiClient.post<CampaignGenerationResponse>('/api/image-generation/generate-campaign', {
+          prompt: campaignPrompt,
+          garment_image_url: garmentImage
+        });
 
-      const payload = isCampaign ? {
-        prompt: fullPrompt,
-        garment_image_url: garmentImage
-      } : {
+        console.log('Campaign generation response:', result);
+
+        if (!result.data) {
+          console.error('No data in response');
+          throw new Error('No response received from server');
+        }
+
+        if (result.data.code !== 0) {
+          console.error('Error code in response:', result.data.code);
+          throw new Error(result.data.message || 'Failed to generate campaign');
+        }
+
+        const campaignContent = result.data.data?.campaign_content;
+        console.log('Extracted campaign content:', campaignContent);
+        
+        if (!campaignContent) {
+          console.error('No campaign content in response data');
+          throw new Error('No campaign content received');
+        }
+
+        // Clear any previous error
+        setError(null);
+        
+        // Set the campaign content
+        console.log('Setting campaign content:', campaignContent);
+        setCampaignContent(campaignContent);
+        return;
+      }
+
+      // Handle image generation
+      const result = await ApiClient.post<GenerateImageResponse>('/api/image-generation/generate-image', {
         prompt: fullPrompt,
         provider: 'replicate',
         model: 'flux-dev',
@@ -111,9 +157,7 @@ export default function AIVirtualTryOn() {
           age,
           skinTone
         }
-      };
-
-      const result = await ApiClient.post<GenerateImageResponse>(endpoint, payload);
+      });
 
       if (result.error) {
         throw new Error(result.error.message);
@@ -172,6 +216,7 @@ export default function AIVirtualTryOn() {
                 modelSettings={`${gender}, ${age}, ${skinTone} skin tone`}
                 onGenerateClick={() => handleGenerateClick(true)}
                 isGenerating={isGenerating}
+                campaignContent={campaignContent}
               />
             )}
           </div>
@@ -290,6 +335,7 @@ export default function AIVirtualTryOn() {
                 modelSettings={`${gender}, ${age}, ${skinTone} skin tone`}
                 onGenerateClick={() => handleGenerateClick(true)}
                 isGenerating={isGenerating}
+                campaignContent={campaignContent}
               />
             )}
           </div>

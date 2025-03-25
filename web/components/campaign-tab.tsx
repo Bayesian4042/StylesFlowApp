@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Sparkles, Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
@@ -14,6 +14,7 @@ interface CampaignTabProps {
   modelSettings?: string;
   onGenerateClick?: () => void;
   isGenerating?: boolean;
+  campaignContent?: string;
 }
 
 type Platform = 'instagram' | 'twitter' | 'facebook' | 'youtube';
@@ -37,10 +38,16 @@ export default function CampaignTab({
   aiModelPrompt,
   modelSettings,
   onGenerateClick,
-  isGenerating
+  isGenerating,
+  campaignContent
 }: CampaignTabProps) {
   const [campaignPrompt, setCampaignPrompt] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([]);
+
+  // Log when campaign content changes
+  useEffect(() => {
+    console.log('CampaignTab: Campaign content updated:', campaignContent);
+  }, [campaignContent]);
 
   const handlePromptChange = (value: string) => {
     setCampaignPrompt(value);
@@ -213,6 +220,52 @@ export default function CampaignTab({
           </p>
         )}
       </div>
+
+      {/* Campaign Content Display */}
+      {campaignContent ? (
+        <div className="mt-6 space-y-4 border-t border-border p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium">Generated Campaign</h3>
+          </div>
+          <div className="rounded-lg bg-muted/50 p-4 border border-dashed border-muted-foreground/25 overflow-auto max-h-[500px]">
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              {/* Convert markdown to HTML */}
+              <div dangerouslySetInnerHTML={{ 
+                __html: campaignContent.split('\n').map(line => {
+                  console.log('Processing line:', line);
+                  // Convert markdown headers
+                  if (line.startsWith('###')) {
+                    return `<h3 class="text-lg font-bold mt-4">${line.replace('###', '').trim()}</h3>`;
+                  }
+                  if (line.startsWith('####')) {
+                    return `<h4 class="text-md font-semibold mt-3">${line.replace('####', '').trim()}</h4>`;
+                  }
+                  // Convert markdown lists
+                  if (line.startsWith('- ')) {
+                    return `<li class="ml-4">${line.replace('- ', '').trim()}</li>`;
+                  }
+                  // Convert markdown bold
+                  line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                  const processedLine = line ? `<p class="my-2">${line}</p>` : '';
+                  console.log('Processed to:', processedLine);
+                  return processedLine;
+                }).join('')
+              }} />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-6 space-y-4 border-t border-border p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium">Generated Campaign</h3>
+          </div>
+          <div className="rounded-lg bg-muted/50 p-4 border border-dashed border-muted-foreground/25">
+            <p className="text-sm text-muted-foreground text-center">
+              Campaign content will appear here after generation
+            </p>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );

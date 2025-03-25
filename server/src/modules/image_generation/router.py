@@ -4,7 +4,14 @@ from pydantic import BaseModel, Field
 import time
 import aiohttp
 
-from .service import generate_image, ImageGenerationResult, virtual_try_on_with_fal, virtual_try_on_with_catvton
+from .service import (
+    generate_image,
+    ImageGenerationResult,
+    virtual_try_on_with_fal,
+    virtual_try_on_with_catvton,
+    generate_campaign_content,
+    CampaignGenerationResult
+)
 from ...config import settings
 
 
@@ -62,6 +69,22 @@ class VirtualTryOnRequest(BaseModel):
     garment_type: str = Field("overall", description="Type of garment (upper, lower, or overall)")
 
 
+class CampaignGenerationRequest(BaseModel):
+    """
+    Request model for campaign generation
+    """
+    prompt: str = Field(..., description="Campaign type/theme")
+    garment_image_url: str = Field(..., description="Base64 data of the garment image")
+
+class CampaignGenerationResponse(BaseModel):
+    """
+    Response model for campaign generation
+    """
+    code: int = Field(0, description="Error code (0 for success)")
+    message: str = Field("Success", description="Error message or success status")
+    request_id: str = Field(..., description="Unique request identifier")
+    data: Optional[CampaignGenerationResult] = Field(None, description="Result data (null if error)")
+
 class ImageGenerationResponse(BaseModel):
     """
     Response model for image operations
@@ -71,6 +94,50 @@ class ImageGenerationResponse(BaseModel):
     request_id: str = Field(..., description="Unique request identifier")
     data: Optional[ImageGenerationResult] = Field(None, description="Result data (null if error)")
 
+
+@router.post("/generate-campaign", response_model=CampaignGenerationResponse)
+async def generate_campaign_endpoint(
+    request: CampaignGenerationRequest
+) -> CampaignGenerationResponse:
+    """
+    Generate campaign content using OpenAI GPT-4 Vision.
+    
+    This endpoint uses OpenAI's GPT-4 Vision model to analyze the garment image
+    and generate creative campaign content based on the provided theme/prompt.
+    
+    Parameters:
+    - prompt: Campaign type or theme
+    - garment_image_url: Base64 data of the garment image
+    """
+    try:
+        result = await generate_campaign_content(
+            prompt=request.prompt,
+            garment_image_url=request.garment_image_url
+        )
+
+        request_id = f"campaign_{int(time.time() * 1000)}_{hash(request.prompt) % 10000:04d}"
+
+        return CampaignGenerationResponse(
+            code=0,
+            message="Success",
+            request_id=request_id,
+            data=result
+        )
+
+    except HTTPException as e:
+        return CampaignGenerationResponse(
+            code=e.status_code,
+            message=str(e.detail),
+            request_id=f"campaign_{int(time.time() * 1000)}_{hash(str(e.detail)) % 10000:04d}",
+            data=None
+        )
+    except Exception as e:
+        return CampaignGenerationResponse(
+            code=500,
+            message=str(e),
+            request_id=f"campaign_{int(time.time() * 1000)}_{hash(str(e)) % 10000:04d}",
+            data=None
+        )
 
 @router.post("/virtual-try-on", response_model=ImageGenerationResponse)
 async def virtual_try_on_endpoint(

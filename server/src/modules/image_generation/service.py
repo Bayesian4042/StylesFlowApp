@@ -4,6 +4,8 @@ from fastapi import HTTPException
 import time
 import os
 
+from src.external_services.openai import analyze_image, generate_campaign
+
 from src.external_services.kling import (
     generate_image_with_kling,
     KlingImageRequest,
@@ -32,6 +34,46 @@ class ImageGenerationResult(BaseModel):
     created_at: int
     updated_at: int
     logs: Optional[List[str]] = None
+    campaign_content: Optional[str] = None
+
+class CampaignGenerationResult(BaseModel):
+    """
+    Response model for campaign generation
+    """
+    task_id: str
+    campaign_content: str
+    status: str
+    created_at: int
+    updated_at: int
+
+async def generate_campaign_content(
+    prompt: str,
+    garment_image_url: str,
+) -> CampaignGenerationResult:
+    """
+    Generate campaign content using OpenAI
+    """
+    try:
+        current_time = int(time.time() * 1000)
+        
+        # Generate campaign content using OpenAI
+        campaign_content = await generate_campaign(
+            image_url=garment_image_url,
+            prompt=prompt
+        )
+        
+        return CampaignGenerationResult(
+            task_id=f"campaign_{current_time}",
+            campaign_content=campaign_content,
+            status="succeed",
+            created_at=current_time,
+            updated_at=current_time
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate campaign: {str(e)}")
 
 async def virtual_try_on_with_catvton(
     human_image_url: str,

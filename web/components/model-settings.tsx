@@ -146,6 +146,7 @@ export default function ModelSettings({
           />
         </div>
       </div>
+
       <div className="p-1 border-border">
         <p className="text-sm font-medium text-muted-foreground mb-2">Select Model</p>
         <Select value={selectedModel} onValueChange={onModelChange}>

@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import AIModelTab from '@/components/ai-model-tab';
+import CampaignTab from '@/components/campaign-tab';
 import ImagePreview from '@/components/image-preview';
 import { ApiClient } from '@/lib/api-client';
+import { NavigationTabs } from '@/components/navigation-tabs';
 
 interface GenerateImageResponse {
   code: number;
@@ -39,6 +41,9 @@ export default function AIVirtualTryOn() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [garmentImage, setGarmentImage] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState('leffa');
+  const [campaignPrompt, setCampaignPrompt] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('ai-model');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
 
   const handleGarmentImageChange = useCallback((image: string | null) => {
     console.log('handleGarmentImageChange called with:', image ? 'Image present' : 'No image');
@@ -52,7 +57,7 @@ export default function AIVirtualTryOn() {
     }
   }, []);
 
-  const handleGenerateClick = async () => {
+  const handleGenerateClick = async (isCampaign = false) => {
     console.log('Generate clicked, garmentImage:', garmentImage ? 'Present' : 'Not present');
     
     if (!prompt.trim()) {
@@ -65,6 +70,11 @@ export default function AIVirtualTryOn() {
       return;
     }
 
+    if (isCampaign && (!campaignPrompt || selectedPlatforms.length === 0)) {
+      setError('Please select platforms and enter campaign type');
+      return;
+    }
+
     if (isGenerating) {
       return;
     }
@@ -73,10 +83,23 @@ export default function AIVirtualTryOn() {
     setIsGenerating(true);
 
     try {
-      // Combine model settings with the prompt
-      const fullPrompt = `${prompt.trim()}, ${gender}, ${age} age, ${skinTone} skin tone`;
+      // Build the complete prompt
+      const modelConfig = `${gender}, ${age} age, ${skinTone} skin tone`;
+      let fullPrompt = `${prompt.trim()}, ${modelConfig}`;
 
-      const result = await ApiClient.post<GenerateImageResponse>('/api/image-generation/generate-image', {
+      if (isCampaign) {
+        const platformsText = selectedPlatforms.join(' and ');
+        fullPrompt = `${fullPrompt}, for ${campaignPrompt} campaign targeting ${platformsText} platforms`;
+      }
+
+      const endpoint = isCampaign 
+        ? '/api/image-generation/generate-campaign'
+        : '/api/image-generation/generate-image';
+
+      const payload = isCampaign ? {
+        prompt: fullPrompt,
+        garment_image_url: garmentImage
+      } : {
         prompt: fullPrompt,
         provider: 'replicate',
         model: 'flux-dev',
@@ -87,7 +110,9 @@ export default function AIVirtualTryOn() {
           age,
           skinTone
         }
-      });
+      };
+
+      const result = await ApiClient.post<GenerateImageResponse>(endpoint, payload);
 
       if (result.error) {
         throw new Error(result.error.message);
@@ -116,39 +141,56 @@ export default function AIVirtualTryOn() {
       <div className='hidden md:flex w-full h-full'>
         {/* Controls Panel */}
         <div className='w-[400px] min-w-[400px] flex flex-col border-r border-border'>
-          <div className='flex-1 overflow-y-auto'>
-            <AIModelTab 
-              prompt={prompt}
-              onPromptChange={setPrompt}
-              error={error}
-              gender={gender}
-              age={age}
-              skinTone={skinTone}
-              onGenderChange={setGender}
-              onAgeChange={setAge}
-              onSkinToneChange={setSkinTone}
-              onGarmentImageChange={handleGarmentImageChange}
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-            />
+          <div className='flex-1 overflow-y-auto flex flex-col'>
+            <div className="p-4 border-b border-border">
+              <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+            {activeTab === 'ai-model' ? (
+              <AIModelTab 
+                prompt={prompt}
+                onPromptChange={setPrompt}
+                error={error}
+                gender={gender}
+                age={age}
+                skinTone={skinTone}
+                onGenderChange={setGender}
+                onAgeChange={setAge}
+                onSkinToneChange={setSkinTone}
+                onGarmentImageChange={handleGarmentImageChange}
+                selectedModel={selectedModel}
+                onModelChange={setSelectedModel}
+              />
+            ) : (
+              <CampaignTab 
+                onCampaignPromptChange={setCampaignPrompt}
+                onPlatformsChange={setSelectedPlatforms}
+                garmentImage={garmentImage}
+                aiModelPrompt={prompt}
+                modelSettings={`${gender}, ${age}, ${skinTone} skin tone`}
+                onGenerateClick={() => handleGenerateClick(true)}
+                isGenerating={isGenerating}
+              />
+            )}
           </div>
           
           {/* Button Section */}
-          <div className="p-4 border-t border-border">
-            <div className="space-y-2">
-              <Button 
-                className="w-full"
-                variant="default"
-                onClick={handleGenerateClick}
-                disabled={isGenerating || !prompt.trim() || !garmentImage}
-              >
-                {isGenerating ? "Generating..." : "Generate"}
-              </Button>
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
-              )}
+          {activeTab === 'ai-model' && (
+            <div className="p-4 border-t border-border">
+              <div className="space-y-2">
+                <Button 
+                  className="w-full"
+                  variant="default"
+                  onClick={() => handleGenerateClick(false)}
+                  disabled={isGenerating || !prompt.trim() || !garmentImage}
+                >
+                  {isGenerating ? "Generating..." : "Generate"}
+                </Button>
+                {error && (
+                  <p className="text-sm text-destructive text-center">{error}</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Preview Area */}
@@ -214,39 +256,56 @@ export default function AIVirtualTryOn() {
       <div className='flex flex-col w-full h-screen md:hidden overflow-x-hidden'>
         {/* Single scrollable container */}
         <div className='flex-1 overflow-y-auto overflow-x-hidden bg-background'>
-          <div className='p-4 pt-14 border-b border-border'>
-            <AIModelTab 
-              prompt={prompt}
-              onPromptChange={setPrompt}
-              error={error}
-              gender={gender}
-              age={age}
-              skinTone={skinTone}
-              onGenderChange={setGender}
-              onAgeChange={setAge}
-              onSkinToneChange={setSkinTone}
-              onGarmentImageChange={handleGarmentImageChange}
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-            />
+          <div className='p-4 pt-14 border-b border-border flex flex-col'>
+            <div className="mb-4">
+              <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+            {activeTab === 'ai-model' ? (
+              <AIModelTab 
+                prompt={prompt}
+                onPromptChange={setPrompt}
+                error={error}
+                gender={gender}
+                age={age}
+                skinTone={skinTone}
+                onGenderChange={setGender}
+                onAgeChange={setAge}
+                onSkinToneChange={setSkinTone}
+                onGarmentImageChange={handleGarmentImageChange}
+                selectedModel={selectedModel}
+                onModelChange={setSelectedModel}
+              />
+            ) : (
+              <CampaignTab 
+                onCampaignPromptChange={setCampaignPrompt}
+                onPlatformsChange={setSelectedPlatforms}
+                garmentImage={garmentImage}
+                aiModelPrompt={prompt}
+                modelSettings={`${gender}, ${age}, ${skinTone} skin tone`}
+                onGenerateClick={() => handleGenerateClick(true)}
+                isGenerating={isGenerating}
+              />
+            )}
           </div>
           
           {/* Button Section */}
-          <div className="p-4 border-b border-border">
-            <div className="space-y-3">
-              <Button 
-                className="w-full"
-                variant="default"
-                onClick={handleGenerateClick}
-                disabled={isGenerating || !prompt.trim() || !garmentImage}
-              >
-                {isGenerating ? "Generating..." : "Generate"}
-              </Button>
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
-              )}
+          {activeTab === 'ai-model' && (
+            <div className="p-4 border-b border-border">
+              <div className="space-y-3">
+                <Button 
+                  className="w-full"
+                  variant="default"
+                  onClick={() => handleGenerateClick(false)}
+                  disabled={isGenerating || !prompt.trim() || !garmentImage}
+                >
+                  {isGenerating ? "Generating..." : "Generate"}
+                </Button>
+                {error && (
+                  <p className="text-sm text-destructive text-center">{error}</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
           {/* Preview Area */}
           <div className='p-4 pb-20 max-w-full'>
@@ -267,11 +326,11 @@ export default function AIVirtualTryOn() {
                     setIsGenerating(true);
 
                     try {
-                    const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
-                      human_image_url: generatedImage,
-                      garment_image_url: garmentImage,
-                      model: selectedModel
-                    });
+                      const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
+                        human_image_url: generatedImage,
+                        garment_image_url: garmentImage,
+                        model: selectedModel
+                      });
 
                       if (result.error) {
                         throw new Error(result.error.message);

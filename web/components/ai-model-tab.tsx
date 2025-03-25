@@ -38,6 +38,8 @@ interface AIModelTabProps {
   onGarmentImageChange: (image: string | null) => void;
   selectedModel: string;
   onModelChange: (model: string) => void;
+  garmentType: string;
+  onGarmentTypeChange: (type: string) => void;
 }
 
 export default function AIModelTab({ 
@@ -52,7 +54,9 @@ export default function AIModelTab({
   onSkinToneChange,
   onGarmentImageChange,
   selectedModel,
-  onModelChange
+  onModelChange,
+  garmentType,
+  onGarmentTypeChange
 }: AIModelTabProps) {
   const modelSettings = `${gender}, ${age}, ${skinTone} skin tone`;
   const [localError, setLocalError] = useState<string | null>(null);
@@ -142,6 +146,21 @@ export default function AIModelTab({
       <div className="border-t border-border p-4">
         <div className="mb-4">
           <p className="text-sm font-medium text-muted-foreground mb-2">Upload Garment Image</p>
+          
+          {/* Garment Type Select */}
+          <div className="mb-4">
+            <Select value={garmentType} onValueChange={onGarmentTypeChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select garment type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="upper">Upper Body (shirts, jackets)</SelectItem>
+                <SelectItem value="lower">Lower Body (pants, skirts)</SelectItem>
+                <SelectItem value="overall">Overall (dresses, jumpsuits)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <ImageUploader 
             singleImage={true}
             onImageUpload={handleGarmentUpload}

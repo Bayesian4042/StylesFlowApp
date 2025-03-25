@@ -44,6 +44,7 @@ export default function AIVirtualTryOn() {
   const [campaignPrompt, setCampaignPrompt] = useState<string>('');
   const [activeTab, setActiveTab] = useState('ai-model');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [garmentType, setGarmentType] = useState('overall');
 
   const handleGarmentImageChange = useCallback((image: string | null) => {
     console.log('handleGarmentImageChange called with:', image ? 'Image present' : 'No image');
@@ -159,6 +160,8 @@ export default function AIVirtualTryOn() {
                 onGarmentImageChange={handleGarmentImageChange}
                 selectedModel={selectedModel}
                 onModelChange={setSelectedModel}
+                garmentType={garmentType}
+                onGarmentTypeChange={setGarmentType}
               />
             ) : (
               <CampaignTab 
@@ -215,7 +218,8 @@ export default function AIVirtualTryOn() {
                     const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
                       human_image_url: generatedImage,
                       garment_image_url: garmentImage,
-                      model: selectedModel
+                      model: selectedModel,
+                      garment_type: garmentType
                     });
 
                     if (result.error) {
@@ -274,6 +278,8 @@ export default function AIVirtualTryOn() {
                 onGarmentImageChange={handleGarmentImageChange}
                 selectedModel={selectedModel}
                 onModelChange={setSelectedModel}
+                garmentType={garmentType}
+                onGarmentTypeChange={setGarmentType}
               />
             ) : (
               <CampaignTab 
@@ -329,7 +335,8 @@ export default function AIVirtualTryOn() {
                       const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
                         human_image_url: generatedImage,
                         garment_image_url: garmentImage,
-                        model: selectedModel
+                        model: selectedModel,
+                        garment_type: garmentType
                       });
 
                       if (result.error) {

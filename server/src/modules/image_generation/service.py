@@ -36,6 +36,7 @@ class ImageGenerationResult(BaseModel):
 async def virtual_try_on_with_catvton(
     human_image_url: str,
     garment_image_url: str,
+    garment_type: str = "overall",
 ) -> ImageGenerationResult:
     """
     Perform virtual try-on with CatVTON model
@@ -47,6 +48,7 @@ async def virtual_try_on_with_catvton(
         catvton_request = CatVTONRequest(
             human_image_url=human_image_url,
             garment_image_url=garment_image_url,
+            garment_type=garment_type,
         )
         
         # Process with CatVTON service
@@ -73,6 +75,7 @@ async def virtual_try_on_with_fal(
     human_image_url: str,
     garment_image_url: str,
     api_key: str,
+    garment_type: str = "overall",
 ) -> ImageGenerationResult:
     """
     Perform virtual try-on with FAL.AI
@@ -84,6 +87,7 @@ async def virtual_try_on_with_fal(
         vton_request = FalVirtualTryOnRequest(
             human_image_url=human_image_url,
             garment_image_url=garment_image_url,
+            garment_type=garment_type,
         )
         
         # Perform virtual try-on

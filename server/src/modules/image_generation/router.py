@@ -59,6 +59,7 @@ class VirtualTryOnRequest(BaseModel):
     human_image_url: str = Field(..., description="URL of the person image")
     garment_image_url: str = Field(..., description="URL of the garment image to try on")
     model: str = Field(..., description="Model to use for virtual try-on (leffa, cat-vton, or kling)")
+    garment_type: str = Field("overall", description="Type of garment (upper, lower, or overall)")
 
 
 class ImageGenerationResponse(BaseModel):
@@ -91,12 +92,14 @@ async def virtual_try_on_endpoint(
             result = await virtual_try_on_with_fal(
                 human_image_url=request.human_image_url,
                 garment_image_url=request.garment_image_url,
-                api_key=settings.FAL_API_KEY
+                api_key=settings.FAL_API_KEY,
+                garment_type=request.garment_type
             )
         elif request.model.lower() == 'cat-vton':
             result = await virtual_try_on_with_catvton(
                 human_image_url=request.human_image_url,
-                garment_image_url=request.garment_image_url
+                garment_image_url=request.garment_image_url,
+                garment_type=request.garment_type
             )
         else:
             # Placeholder for other models

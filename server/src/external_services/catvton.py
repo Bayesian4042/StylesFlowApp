@@ -14,6 +14,7 @@ class CatVTONRequest(BaseModel):
     """
     human_image_url: str
     garment_image_url: str
+    garment_type: str = "overall"
 
 class CatVTONResponse(BaseModel):
     """
@@ -97,7 +98,7 @@ async def virtual_try_on(request: CatVTONRequest) -> CatVTONResponse:
             )
 
             # Add other form fields
-            form_data.add_field("cloth_type", "upper")
+            form_data.add_field("cloth_type", request.garment_type)
             form_data.add_field("num_inference_steps", "50")
             form_data.add_field("guidance_scale", "3")
             form_data.add_field("seed", "42")

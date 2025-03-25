@@ -154,9 +154,9 @@ export default function ModelSettings({
             <SelectValue placeholder="Select a model" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="leffa">Leffa</SelectItem>
-            <SelectItem value="cat-vton">Cat-VTON</SelectItem>
-            <SelectItem value="kling">Kling</SelectItem>
+            <SelectItem value="cat-vton">Community AI (Non-commercial use only)</SelectItem>
+            <SelectItem value="leffa">Enhanced AI</SelectItem>
+            <SelectItem value="kling">Premium AI</SelectItem>
           </SelectContent>
         </Select>
       </div>

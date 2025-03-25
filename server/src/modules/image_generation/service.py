@@ -129,7 +129,6 @@ async def virtual_try_on_with_fal(
         vton_request = FalVirtualTryOnRequest(
             human_image_url=human_image_url,
             garment_image_url=garment_image_url,
-            garment_type=garment_type,
         )
         
         # Perform virtual try-on

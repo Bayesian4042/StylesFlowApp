@@ -9,7 +9,6 @@ class FalVirtualTryOnRequest(BaseModel):
     """
     human_image_url: str
     garment_image_url: str
-    garment_type: str = "overall"
 
 class FalVirtualTryOnResponse(BaseModel):
     """
@@ -31,8 +30,7 @@ async def virtual_try_on(request: FalVirtualTryOnRequest, api_key: str) -> FalVi
             "fal-ai/leffa/virtual-tryon",
             arguments={
                 "human_image_url": request.human_image_url,
-                "garment_image_url": request.garment_image_url,
-                "garment_type": request.garment_type
+                "garment_image_url": request.garment_image_url
             },
         )
 

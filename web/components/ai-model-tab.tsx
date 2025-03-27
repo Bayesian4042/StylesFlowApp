@@ -74,49 +74,33 @@ export default function AIModelTab({
       }
     }
 
-    // Split by comma but preserve product descriptions
-    const parts = cleanPrompt.split(/,(?![^()]*\))/); // Split on commas not inside parentheses
-    
-    // Find the part that contains "wearing" if it exists
-    const wearingIndex = parts.findIndex(part => 
-      part.toLowerCase().trim().includes('wearing')
-    );
-
-    if (wearingIndex !== -1) {
-      // Keep everything up to and including the wearing part in pose
-      const pose = parts.slice(0, wearingIndex + 1).join(',').trim();
-      // Only use remaining parts (if any) as background if they don't contain product info
-      const remainingParts = parts.slice(wearingIndex + 1);
-      const background = remainingParts.some(part => 
-        part.toLowerCase().includes('content:') || 
-        part.toLowerCase().includes('%') ||
-        part.toLowerCase().includes('gsm') ||
-        part.toLowerCase().includes('fabric')
-      ) ? '' : remainingParts.join(',').trim();
-      
-      return { pose, background };
-    }
-
-    // If no wearing keyword, check if any part contains product-related terms
-    const hasProductInfo = parts.some(part => 
-      part.toLowerCase().includes('content:') || 
-      part.toLowerCase().includes('%') ||
-      part.toLowerCase().includes('gsm') ||
-      part.toLowerCase().includes('fabric')
-    );
+    // If prompt contains product info, keep it all in pose
+    const hasProductInfo = cleanPrompt.toLowerCase().includes('wearing') ||
+      cleanPrompt.toLowerCase().includes('content:') ||
+      cleanPrompt.toLowerCase().includes('%') ||
+      cleanPrompt.toLowerCase().includes('gsm') ||
+      cleanPrompt.toLowerCase().includes('fabric');
 
     if (hasProductInfo) {
-      // Keep everything in pose if it contains product info
       return {
         pose: cleanPrompt,
         background: ''
       };
     }
 
-    // Default case: first part is pose, rest is background
+    // If no product info, split on last comma
+    const lastCommaIndex = cleanPrompt.lastIndexOf(',');
+    if (lastCommaIndex !== -1) {
+      return {
+        pose: cleanPrompt.slice(0, lastCommaIndex).trim(),
+        background: cleanPrompt.slice(lastCommaIndex + 1).trim()
+      };
+    }
+
+    // No comma found, treat everything as pose
     return {
-      pose: parts[0]?.trim() || '',
-      background: parts.slice(1).join(',').trim()
+      pose: cleanPrompt,
+      background: ''
     };
   };
 
@@ -151,19 +135,19 @@ export default function AIModelTab({
 
     const parts = [];
     parts.push(`A person ${modelSettings.toLowerCase()}`);
-    if (newPose) parts.push(newPose);
+    if (newPose) parts.push(newPose.trim());
     // Only add background if pose doesn't contain product info
-    if (!hasProductInfo && backgroundPrompt) parts.push(backgroundPrompt);
-    onPromptChange(parts.join(', ').trim());
+    if (!hasProductInfo && backgroundPrompt) parts.push(backgroundPrompt.trim());
+    onPromptChange(parts.map(part => part.trim()).join(', '));
   }, [modelSettings, backgroundPrompt, onPromptChange]);
 
   const handleBackgroundChange = useCallback((newBackground: string) => {
     setBackgroundPrompt(newBackground);
     const parts = [];
     parts.push(`A person ${modelSettings.toLowerCase()}`);
-    if (posePrompt) parts.push(posePrompt);
-    if (newBackground) parts.push(newBackground);
-    onPromptChange(parts.join(', ').trim());
+    if (posePrompt) parts.push(posePrompt.trim());
+    if (newBackground) parts.push(newBackground.trim());
+    onPromptChange(parts.map(part => part.trim()).join(', '));
   }, [modelSettings, posePrompt, onPromptChange]);
 
   const handleGarmentUpload = useCallback((image: string | null) => {

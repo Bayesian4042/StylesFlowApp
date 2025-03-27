@@ -21,13 +21,20 @@ export default function PromptInput({ value, onChange, type, modelSettings, show
 							<User className="h-4 w-4 text-primary" />
 							<h3 className='text-sm font-medium'>Model Pose</h3>
 						</div>
-						<input
-							type="text"
+						<textarea
 							value={value}
 							onChange={(e) => onChange(e.target.value)}
-							className='min-h-[2.5rem] w-full border-none bg-transparent text-foreground focus:outline-none relative z-10 text-sm px-0'
+							className='min-h-[2.5rem] w-full border-none bg-transparent text-foreground focus:outline-none relative z-10 text-sm px-0 resize-none overflow-hidden'
 							placeholder="Describe model's pose and expression..."
 							spellCheck={false}
+							rows={1}
+							style={{ height: 'auto' }}
+							onInput={(e) => {
+								// Auto-adjust height
+								const target = e.target as HTMLTextAreaElement;
+								target.style.height = 'auto';
+								target.style.height = `${target.scrollHeight}px`;
+							}}
 						/>
 						<div className='text-xs text-muted-foreground mt-1'>
 							<span className="italic">E.g., standing straight, looking at camera</span>
@@ -42,13 +49,20 @@ export default function PromptInput({ value, onChange, type, modelSettings, show
 							<MountainSnow className="h-4 w-4 text-primary" />
 							<h3 className='text-sm font-medium'>Background</h3>
 						</div>
-						<input
-							type="text"
+						<textarea
 							value={value}
 							onChange={(e) => onChange(e.target.value)}
-							className='min-h-[2.5rem] w-full border-none bg-transparent text-foreground focus:outline-none relative z-10 text-sm px-0'
+							className='min-h-[2.5rem] w-full border-none bg-transparent text-foreground focus:outline-none relative z-10 text-sm px-0 resize-none overflow-hidden'
 							placeholder='Describe scene and lighting...'
 							spellCheck={false}
+							rows={1}
+							style={{ height: 'auto' }}
+							onInput={(e) => {
+								// Auto-adjust height
+								const target = e.target as HTMLTextAreaElement;
+								target.style.height = 'auto';
+								target.style.height = `${target.scrollHeight}px`;
+							}}
 						/>
 						<div className='text-xs text-muted-foreground mt-1'>
 							<span className="italic">E.g., modern city street, sunny day</span>

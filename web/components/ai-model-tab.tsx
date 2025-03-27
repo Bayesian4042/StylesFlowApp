@@ -74,44 +74,97 @@ export default function AIModelTab({
       }
     }
 
-    const parts = cleanPrompt.split(',').map(p => p.trim());
+    // Split by comma but preserve product descriptions
+    const parts = cleanPrompt.split(/,(?![^()]*\))/); // Split on commas not inside parentheses
+    
+    // Find the part that contains "wearing" if it exists
+    const wearingIndex = parts.findIndex(part => 
+      part.toLowerCase().trim().includes('wearing')
+    );
+
+    if (wearingIndex !== -1) {
+      // Keep everything up to and including the wearing part in pose
+      const pose = parts.slice(0, wearingIndex + 1).join(',').trim();
+      // Only use remaining parts (if any) as background if they don't contain product info
+      const remainingParts = parts.slice(wearingIndex + 1);
+      const background = remainingParts.some(part => 
+        part.toLowerCase().includes('content:') || 
+        part.toLowerCase().includes('%') ||
+        part.toLowerCase().includes('gsm') ||
+        part.toLowerCase().includes('fabric')
+      ) ? '' : remainingParts.join(',').trim();
+      
+      return { pose, background };
+    }
+
+    // If no wearing keyword, check if any part contains product-related terms
+    const hasProductInfo = parts.some(part => 
+      part.toLowerCase().includes('content:') || 
+      part.toLowerCase().includes('%') ||
+      part.toLowerCase().includes('gsm') ||
+      part.toLowerCase().includes('fabric')
+    );
+
+    if (hasProductInfo) {
+      // Keep everything in pose if it contains product info
+      return {
+        pose: cleanPrompt,
+        background: ''
+      };
+    }
+
+    // Default case: first part is pose, rest is background
     return {
-      pose: parts[0] || '',
-      background: parts.slice(1).join(', ').trim()
+      pose: parts[0]?.trim() || '',
+      background: parts.slice(1).join(',').trim()
     };
   };
 
-  // Get initial pose and background from prompt
-  const { pose: initialPose, background: initialBackground } = getPoseAndBackground(prompt);
-  const [posePrompt, setPosePrompt] = useState(initialPose);
-  const [backgroundPrompt, setBackgroundPrompt] = useState(initialBackground);
-
-  // Update parent's prompt when either pose or background changes
-  const updateCombinedPrompt = useCallback((newPose: string, newBackground: string) => {
-    const parts = [];
-    
-    // Add model settings first
-    parts.push(`A person ${modelSettings.toLowerCase()}`);
-    
-    // Add pose and background if they exist
-    if (newPose) parts.push(newPose);
-    if (newBackground) parts.push(newBackground);
-    
-    const combinedPrompt = parts.join(', ').trim();
-    onPromptChange(combinedPrompt);
-  }, [modelSettings, onPromptChange]);
-
-  // Update combined prompt when pose or background changes
-  useEffect(() => {
-    updateCombinedPrompt(posePrompt, backgroundPrompt);
-  }, [posePrompt, backgroundPrompt, updateCombinedPrompt]);
+  // Initialize state with default values
+  const [posePrompt, setPosePrompt] = useState('');
+  const [backgroundPrompt, setBackgroundPrompt] = useState('white background');
 
   // Update local state when parent prompt changes
   useEffect(() => {
-    const { pose, background } = getPoseAndBackground(prompt);
-    setPosePrompt(pose);
-    setBackgroundPrompt(background);
-  }, [prompt]);
+    if (prompt) {
+      const { pose, background } = getPoseAndBackground(prompt);
+      setPosePrompt(pose);
+      setBackgroundPrompt(background);
+    }
+  }, [prompt, modelSettings]);
+
+  // Handle local prompt updates
+  const handlePoseChange = useCallback((newPose: string) => {
+    // Check if the new pose contains product info
+    const hasProductInfo = newPose.toLowerCase().includes('wearing') ||
+      newPose.toLowerCase().includes('content:') ||
+      newPose.toLowerCase().includes('%') ||
+      newPose.toLowerCase().includes('gsm') ||
+      newPose.toLowerCase().includes('fabric');
+
+    setPosePrompt(newPose);
+    
+    // If pose contains product info, set default white background
+    if (hasProductInfo) {
+      setBackgroundPrompt('white background');
+    }
+
+    const parts = [];
+    parts.push(`A person ${modelSettings.toLowerCase()}`);
+    if (newPose) parts.push(newPose);
+    // Only add background if pose doesn't contain product info
+    if (!hasProductInfo && backgroundPrompt) parts.push(backgroundPrompt);
+    onPromptChange(parts.join(', ').trim());
+  }, [modelSettings, backgroundPrompt, onPromptChange]);
+
+  const handleBackgroundChange = useCallback((newBackground: string) => {
+    setBackgroundPrompt(newBackground);
+    const parts = [];
+    parts.push(`A person ${modelSettings.toLowerCase()}`);
+    if (posePrompt) parts.push(posePrompt);
+    if (newBackground) parts.push(newBackground);
+    onPromptChange(parts.join(', ').trim());
+  }, [modelSettings, posePrompt, onPromptChange]);
 
   const handleGarmentUpload = useCallback((image: string | null) => {
     console.log('Received image in handleGarmentUpload:', image ? 'Image present' : 'No image');
@@ -169,14 +222,14 @@ export default function AIModelTab({
       </div>
       <PromptInput 
         value={posePrompt}
-        onChange={setPosePrompt}
+        onChange={handlePoseChange}
         type="pose"
         modelSettings={modelSettings}
         showPreview={false}
       />
       <PromptInput 
         value={backgroundPrompt}
-        onChange={setBackgroundPrompt}
+        onChange={handleBackgroundChange}
         type="background"
         showPreview={false}
       />

@@ -53,11 +53,11 @@ export default function AIVirtualTryOn() {
   const [skinTone, setSkinTone] = useState('light');
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [garmentImage, setGarmentImage] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState('leffa');
+  const [selectedModel, setSelectedModel] = useState('cat-vton');
   const [campaignPrompt, setCampaignPrompt] = useState<string>('');
   const [activeTab, setActiveTab] = useState('ai-model');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [garmentType, setGarmentType] = useState('overall');
+  const [garmentType, setGarmentType] = useState('upper');
   const [campaignContent, setCampaignContent] = useState<string>('');
 
   const handleGarmentImageChange = useCallback((image: string | null) => {

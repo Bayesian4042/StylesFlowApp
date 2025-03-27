@@ -6,11 +6,12 @@ import { apiUrl } from '@/config';
 
 interface ImagePreviewProps {
 	imageUrl: string | null;
-	previewType?: 'ai-model' | 'cloth-overlay';
+	previewType?: 'ai-model';
 	onOverlayClick?: () => void;
 	isGenerating?: boolean;
 	garmentImage?: string | null;
 	showOverlayButton?: boolean;
+	isOverlaid?: boolean;
 }
 
 export default function ImagePreview({ 
@@ -19,27 +20,28 @@ export default function ImagePreview({
 	onOverlayClick,
 	isGenerating,
 	garmentImage,
-	showOverlayButton = false
+	showOverlayButton = false,
+	isOverlaid = false
 }: ImagePreviewProps) {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		if (imageUrl) {
-			console.log(`Loading ${previewType} image:`, imageUrl.substring(0, 100) + '...');
+			console.log('Loading image:', imageUrl.substring(0, 100) + '...');
 			setIsLoading(true);
 			setError(null);
 		}
-	}, [imageUrl, previewType]);
+	}, [imageUrl]);
 
 	const handleImageLoad = () => {
-		console.log(`${previewType} image loaded successfully`);
+		console.log('Image loaded successfully');
 		setIsLoading(false);
 	};
 
 	const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 		const img = e.target as HTMLImageElement;
-		console.error(`Error loading ${previewType} image:`, {
+		console.error('Error loading image:', {
 			src: img.src,
 			naturalWidth: img.naturalWidth,
 			naturalHeight: img.naturalHeight,
@@ -69,21 +71,21 @@ export default function ImagePreview({
 							key={imageUrl} // Force re-render when URL changes
 							src={imageUrl.startsWith('http') ? imageUrl : `${apiUrl}/${imageUrl}`}
 							alt='Generated image'
-							className='max-w-full h-auto max-h-[520px] rounded-lg object-contain'
+							className='max-w-full h-auto max-h-[720px] rounded-lg object-contain'
 							onLoad={handleImageLoad}
 							onError={handleImageError}
 							crossOrigin="anonymous"
 						/>
 					)}
 				</div>
-				{showOverlayButton && previewType === 'ai-model' && (
+				{showOverlayButton && !isOverlaid && (
 					<div className="absolute bottom-0 left-0 right-0 h-[48px] px-4 py-2 border-t border-border bg-card">
 						<button
 							className="w-full px-4 py-2 text-sm font-medium text-center bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
 							onClick={onOverlayClick}
 							disabled={isGenerating || !garmentImage}
 						>
-							{isGenerating ? "Processing..." : "Overlay Garment"}
+							{isGenerating ? "Processing..." : "Try On Garment"}
 						</button>
 					</div>
 				)}
@@ -106,12 +108,7 @@ export default function ImagePreview({
 						<circle cx='9' cy='9' r='2' />
 						<path d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21' />
 					</svg>
-					<p>
-						{previewType === 'ai-model' 
-							? 'Enter a prompt and click Generate to create an AI model'
-							: 'Upload or generate a cloth image for overlay'
-						}
-						</p>
+					<p>Enter a prompt and click Generate to create an AI model</p>
 				</div>
 			)}
 		</div>

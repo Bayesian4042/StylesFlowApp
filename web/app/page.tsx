@@ -73,7 +73,12 @@ export default function AIVirtualTryOn() {
   }, []);
 
   const handleGenerateClick = async (isCampaign = false) => {
-    console.log('Generate clicked, garmentImage:', garmentImage ? 'Present' : 'Not present');
+    console.log('Generate clicked:', {
+      isCampaign,
+      garmentImage: garmentImage ? 'Present' : 'Not present',
+      selectedModel,
+      prompt: prompt.trim()
+    });
     
     if (!prompt.trim()) {
       setError('Please enter a prompt before generating');
@@ -108,7 +113,10 @@ export default function AIVirtualTryOn() {
       }
 
       if (isCampaign) {
-        console.log('Starting campaign generation with prompt:', campaignPrompt);
+        console.log('Starting campaign generation:', {
+          prompt: campaignPrompt,
+          garmentImage: garmentImage ? 'Present' : 'Not present'
+        });
         
         // Handle campaign generation
         const result = await ApiClient.post<CampaignGenerationResponse>('/api/image-generation/generate-campaign', {
@@ -146,11 +154,39 @@ export default function AIVirtualTryOn() {
       }
 
       // Handle image generation
+      // Map model names to providers
+      let provider;
+      switch (selectedModel) {
+        case 'cat-vton':
+          provider = 'replicate';
+          break;
+        case 'leffa':
+          provider = 'replicate';
+          break;
+        case 'kling':
+          provider = 'replicate';
+          break;
+        default:
+          provider = 'replicate';
+      }
+      console.log(`Selected model: ${selectedModel}, Using provider: ${provider}`);
+
+      console.log('Making API request with:', {
+        prompt: fullPrompt,
+        provider,
+        model: provider === 'replicate' ? 'flux-dev' : undefined,
+        guidance: provider === 'replicate' ? 3.5 : undefined,
+        width: provider === 'kling' ? 1024 : undefined,
+        height: provider === 'kling' ? 1024 : undefined,
+      });
+
       const result = await ApiClient.post<GenerateImageResponse>('/api/image-generation/generate-image', {
         prompt: fullPrompt,
-        provider: 'replicate',
-        model: 'flux-dev',
-        guidance: 3.5,
+        provider: provider,
+        model: provider === 'replicate' ? 'flux-dev' : undefined,
+        guidance: provider === 'replicate' ? 3.5 : undefined,
+        width: provider === 'kling' ? 1024 : undefined,
+        height: provider === 'kling' ? 1024 : undefined,
         garment_image_url: garmentImage,
         settings: {
           gender,
@@ -159,14 +195,29 @@ export default function AIVirtualTryOn() {
         }
       });
 
+      console.log('Image generation response:', result);
+
       if (result.error) {
+        console.error('API error:', result.error);
         throw new Error(result.error.message);
       }
 
-      const imageUrl = result.data?.data?.images?.[0];
+      if (!result.data) {
+        console.error('No data in response');
+        throw new Error('No response received from server');
+      }
+
+      if (result.data.code !== 0) {
+        console.error('Error code in response:', result.data.code);
+        throw new Error(result.data.message || 'Failed to generate image');
+      }
+
+      const imageUrl = result.data.data?.images?.[0];
       if (imageUrl) {
+        console.log('Setting generated image URL:', imageUrl);
         setGeneratedImage(imageUrl);
       } else {
+        console.error('No image URL in response');
         throw new Error('No image was generated');
       }
     } catch (error) {
@@ -241,15 +292,16 @@ export default function AIVirtualTryOn() {
           )}
         </div>
 
-        {/* Preview Area */}
-        <div className='flex-1 flex flex-col gap-6 p-6 overflow-y-auto'>
-          {/* AI Model Preview */}
-          <div className='w-full md:w-[800px] h-[600px]'>
-            <div className='mb-2 text-sm font-medium text-muted-foreground'>AI Model Preview</div>
+          {/* Preview Area */}
+        <div className='flex-1 flex flex-col p-6 overflow-y-auto'>
+          {/* Model Preview */}
+          <div className='w-full md:w-[1000px] h-[800px]'>
+            <div className='mb-2 text-sm font-medium text-muted-foreground'>Model Preview</div>
             <div className='h-[calc(100%-28px)]'>
               <ImagePreview 
-                imageUrl={generatedImage} 
+                imageUrl={overlayImage || generatedImage}
                 previewType="ai-model"
+                isOverlaid={!!overlayImage}
                 onOverlayClick={async () => {
                   if (!generatedImage || !garmentImage) {
                     setError('Both model and garment images are required');
@@ -260,21 +312,56 @@ export default function AIVirtualTryOn() {
                   setIsGenerating(true);
 
                   try {
+                    // Map model names to actual model values for virtual try-on
+                    let tryOnModel;
+                    switch (selectedModel) {
+                      case 'cat-vton':
+                        tryOnModel = 'cat-vton';
+                        break;
+                      case 'leffa':
+                        tryOnModel = 'leffa';
+                        break;
+                      case 'kling':
+                        tryOnModel = 'kling';
+                        break;
+                      default:
+                        tryOnModel = 'leffa';
+                    }
+
+                    console.log('Virtual try-on request:', {
+                      human_image_url: generatedImage,
+                      garment_image_url: garmentImage,
+                      model: tryOnModel,
+                      garment_type: garmentType
+                    });
+
                     const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
                       human_image_url: generatedImage,
                       garment_image_url: garmentImage,
-                      model: selectedModel,
+                      model: tryOnModel,
                       garment_type: garmentType
                     });
+
+                    console.log('Virtual try-on response:', result);
 
                     if (result.error) {
                       throw new Error(result.error.message);
                     }
 
-                    if (result.data?.code === 0 && result.data?.data?.images?.length > 0) {
-                      // For cat-vton and other models, use first image from the list
-                      setOverlayImage(result.data.data.images[0]);
+                    if (!result.data) {
+                      throw new Error('No response received from server');
+                    }
+
+                    if (result.data.code !== 0) {
+                      throw new Error(result.data.message || 'Failed to generate try-on image');
+                    }
+
+                    if (result.data.data?.images?.length > 0) {
+                      const imageUrl = result.data.data.images[0];
+                      console.log('Setting overlay image URL:', imageUrl);
+                      setOverlayImage(imageUrl);
                     } else {
+                      console.error('No images in response:', result.data);
                       throw new Error('No valid overlay image URL was generated');
                     }
                   } catch (error) {
@@ -288,14 +375,6 @@ export default function AIVirtualTryOn() {
                 garmentImage={garmentImage}
                 showOverlayButton={true}
               />
-            </div>
-          </div>
-          
-          {/* Cloth Overlay Preview */}
-          <div className='w-full md:w-[800px] h-[600px]'>
-            <div className='mb-2 text-sm font-medium text-muted-foreground'>Cloth Overlay Preview</div>
-            <div className='h-[calc(100%-28px)]'>
-              <ImagePreview imageUrl={overlayImage} previewType="cloth-overlay" />
             </div>
           </div>
         </div>
@@ -361,13 +440,14 @@ export default function AIVirtualTryOn() {
           
           {/* Preview Area */}
           <div className='p-4 pb-20 max-w-full'>
-            {/* AI Model Preview */}
-            <div className='mb-8'>
-              <div className='mb-2 text-sm font-medium text-muted-foreground'>AI Model Preview</div>
-              <div className='w-full max-w-full h-[600px]'>
+            {/* Model Preview */}
+            <div>
+              <div className='mb-2 text-sm font-medium text-muted-foreground'>Model Preview</div>
+              <div className='w-full max-w-full h-[800px]'>
                 <ImagePreview 
-                  imageUrl={generatedImage} 
+                  imageUrl={overlayImage || generatedImage}
                   previewType="ai-model"
+                  isOverlaid={!!overlayImage}
                   onOverlayClick={async () => {
                     if (!generatedImage || !garmentImage) {
                       setError('Both model and garment images are required');
@@ -378,21 +458,56 @@ export default function AIVirtualTryOn() {
                     setIsGenerating(true);
 
                     try {
+                      // Map model names to actual model values for virtual try-on
+                      let tryOnModel;
+                      switch (selectedModel) {
+                        case 'cat-vton':
+                          tryOnModel = 'cat-vton';
+                          break;
+                        case 'leffa':
+                          tryOnModel = 'leffa';
+                          break;
+                        case 'kling':
+                          tryOnModel = 'kling';
+                          break;
+                        default:
+                          tryOnModel = 'leffa';
+                      }
+
+                      console.log('Virtual try-on request:', {
+                        human_image_url: generatedImage,
+                        garment_image_url: garmentImage,
+                        model: tryOnModel,
+                        garment_type: garmentType
+                      });
+
                       const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
                         human_image_url: generatedImage,
                         garment_image_url: garmentImage,
-                        model: selectedModel,
+                        model: tryOnModel,
                         garment_type: garmentType
                       });
+
+                      console.log('Virtual try-on response:', result);
 
                       if (result.error) {
                         throw new Error(result.error.message);
                       }
 
-                      if (result.data?.code === 0 && result.data?.data?.images?.length > 0) {
-                        // For cat-vton and other models, use first image from the list
-                        setOverlayImage(result.data.data.images[0]);
+                      if (!result.data) {
+                        throw new Error('No response received from server');
+                      }
+
+                      if (result.data.code !== 0) {
+                        throw new Error(result.data.message || 'Failed to generate try-on image');
+                      }
+
+                      if (result.data.data?.images?.length > 0) {
+                        const imageUrl = result.data.data.images[0];
+                        console.log('Setting overlay image URL:', imageUrl);
+                        setOverlayImage(imageUrl);
                       } else {
+                        console.error('No images in response:', result.data);
                         throw new Error('No valid overlay image URL was generated');
                       }
                     } catch (error) {
@@ -406,14 +521,6 @@ export default function AIVirtualTryOn() {
                   garmentImage={garmentImage}
                   showOverlayButton={true}
                 />
-              </div>
-            </div>
-            
-            {/* Cloth Overlay Preview */}
-            <div>
-              <div className='mb-2 text-sm font-medium text-muted-foreground'>Cloth Overlay Preview</div>
-              <div className='w-full max-w-full h-[600px]'>
-                <ImagePreview imageUrl={overlayImage} previewType="cloth-overlay" />
               </div>
             </div>
           </div>

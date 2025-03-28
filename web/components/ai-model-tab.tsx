@@ -61,93 +61,25 @@ export default function AIModelTab({
   const modelSettings = `${gender}, ${age}, ${skinTone} skin tone`;
   const [localError, setLocalError] = useState<string | null>(null);
 
-  // Extract pose and background from the combined prompt
-  const getPoseAndBackground = (fullPrompt: string) => {
-    const modelSettingsPrefix = `A person ${modelSettings.toLowerCase()}`;
-    let cleanPrompt = fullPrompt;
-    
-    // Remove model settings if present
-    if (cleanPrompt.startsWith(modelSettingsPrefix)) {
-      cleanPrompt = cleanPrompt.slice(modelSettingsPrefix.length).trim();
-      if (cleanPrompt.startsWith(',')) {
-        cleanPrompt = cleanPrompt.slice(1).trim();
-      }
-    }
-
-    // If prompt contains product info, keep it all in pose
-    const hasProductInfo = cleanPrompt.toLowerCase().includes('wearing') ||
-      cleanPrompt.toLowerCase().includes('content:') ||
-      cleanPrompt.toLowerCase().includes('%') ||
-      cleanPrompt.toLowerCase().includes('gsm') ||
-      cleanPrompt.toLowerCase().includes('fabric');
-
-    if (hasProductInfo) {
-      return {
-        pose: cleanPrompt,
-        background: ''
-      };
-    }
-
-    // If no product info, split on last comma
-    const lastCommaIndex = cleanPrompt.lastIndexOf(',');
-    if (lastCommaIndex !== -1) {
-      return {
-        pose: cleanPrompt.slice(0, lastCommaIndex).trim(),
-        background: cleanPrompt.slice(lastCommaIndex + 1).trim()
-      };
-    }
-
-    // No comma found, treat everything as pose
-    return {
-      pose: cleanPrompt,
-      background: ''
-    };
-  };
-
-  // Initialize state with default values
+  // Separate state for each prompt
   const [posePrompt, setPosePrompt] = useState('');
-  const [backgroundPrompt, setBackgroundPrompt] = useState('white background');
+  const [backgroundPrompt, setBackgroundPrompt] = useState('');
 
-  // Update local state when parent prompt changes
-  useEffect(() => {
-    if (prompt) {
-      const { pose, background } = getPoseAndBackground(prompt);
-      setPosePrompt(pose);
-      setBackgroundPrompt(background);
-    }
-  }, [prompt, modelSettings]);
-
-  // Handle local prompt updates
+  // Simple handlers for each prompt
   const handlePoseChange = useCallback((newPose: string) => {
-    // Check if the new pose contains product info
-    const hasProductInfo = newPose.toLowerCase().includes('wearing') ||
-      newPose.toLowerCase().includes('content:') ||
-      newPose.toLowerCase().includes('%') ||
-      newPose.toLowerCase().includes('gsm') ||
-      newPose.toLowerCase().includes('fabric');
-
     setPosePrompt(newPose);
-    
-    // If pose contains product info, set default white background
-    if (hasProductInfo) {
-      setBackgroundPrompt('white background');
-    }
-
-    const parts = [];
-    parts.push(`A person ${modelSettings.toLowerCase()}`);
-    if (newPose) parts.push(newPose.trim());
-    // Only add background if pose doesn't contain product info
-    if (!hasProductInfo && backgroundPrompt) parts.push(backgroundPrompt.trim());
-    onPromptChange(parts.map(part => part.trim()).join(', '));
+    const parts = [`A person ${modelSettings.toLowerCase()}`];
+    if (newPose) parts.push(newPose);
+    if (backgroundPrompt) parts.push(backgroundPrompt);
+    onPromptChange(parts.join(', '));
   }, [modelSettings, backgroundPrompt, onPromptChange]);
 
   const handleBackgroundChange = useCallback((newBackground: string) => {
     setBackgroundPrompt(newBackground);
-    const parts = [];
-    parts.push(`A person ${modelSettings.toLowerCase()}`);
-    if (posePrompt) parts.push(posePrompt.trim());
-    if (newBackground) parts.push(newBackground.trim());
-    onPromptChange(parts.map(part => part.trim()).join(', '));
+    const parts = [`A person ${modelSettings.toLowerCase()}`];
+    if (posePrompt) parts.push(posePrompt);
+    if (newBackground) parts.push(newBackground);
+    onPromptChange(parts.join(', '));
   }, [modelSettings, posePrompt, onPromptChange]);
 
   const handleGarmentUpload = useCallback((image: string | null) => {

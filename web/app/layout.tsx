@@ -12,8 +12,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-	title: 'FastAPI + Next.js',
-	description: 'FastAPI + Next.js',
+	title: 'StylesFlow',
+	description: 'StylesFlow',
 };
 
 export default async function RootLayout({

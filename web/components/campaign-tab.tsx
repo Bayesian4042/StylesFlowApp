@@ -157,7 +157,7 @@ export default function CampaignTab({
               </div>
               {modelSettings && (
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Model Settings:</p>
+                  <p className="text-xs text-muted-foreground mb-1">AI Model Settings:</p>
                   <div className="flex gap-2 flex-wrap">
                     {modelSettings.split(', ').map((setting, index) => (
                       <div 

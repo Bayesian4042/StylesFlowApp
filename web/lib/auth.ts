@@ -1,7 +1,8 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { compare } from 'bcrypt';
-import { NEXTAUTH_SECRET } from '@/config';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } from '@/config';
 import { AuthService } from '@/services/auth.service';
 
 declare module 'next-auth' {
@@ -40,6 +41,10 @@ export const authOptions: NextAuthOptions = {
 	},
 	debug: true,
 	providers: [
+		GoogleProvider({
+			clientId: GOOGLE_CLIENT_ID,
+			clientSecret: GOOGLE_CLIENT_SECRET,
+		}),
 		CredentialsProvider({
 			name: 'Credentials',
 			credentials: {
@@ -68,27 +73,26 @@ export const authOptions: NextAuthOptions = {
 		}),
 	],
 	callbacks: {
+		async signIn({ account, profile }) {
+			if (account?.provider === 'google' && profile?.email) {
+				return true;
+			}
+			return false;
+		},
 		session: ({ session, token }) => {
 			return {
 				...session,
 				user: {
 					...session.user,
-					id: token.id,
-					token: token.token,
-					avatar: token.avatar,
+					id: token.sub || '',
+					token: token.access_token || '',
+					avatar: session.user.image || '',
 				},
 			};
 		},
-		jwt: ({ token, user }) => {
-			if (user) {
-				return {
-					...token,
-					id: user.id,
-					name: user.name,
-					email: user.email,
-					avatar: user.avatar,
-					token: user.token,
-				};
+		jwt: ({ token, account }) => {
+			if (account) {
+				token.access_token = account.access_token;
 			}
 			return token;
 		},

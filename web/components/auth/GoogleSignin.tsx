@@ -12,9 +12,17 @@ const GoogleSignin = () => {
 			variant='outline'
 			className='h-11 w-full font-medium'
 			onClick={async () => {
-				setIsLoading(true);
-				await signIn('google');
-				setIsLoading(false);
+				try {
+					setIsLoading(true);
+					await signIn('google', {
+						callbackUrl: '/virtual-try-on',
+						redirect: true,
+					});
+				} catch (error) {
+					console.error('Google sign-in error:', error);
+				} finally {
+					setIsLoading(false);
+				}
 			}}
 			disabled={isLoading}
 		>

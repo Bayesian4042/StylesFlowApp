@@ -52,4 +52,12 @@ export class AuthService {
 	static async deleteCurrentUser() {
 		return await ApiClient.delete<boolean>('/api/auth/users/me');
 	}
+
+	/**
+	 * Authenticate with Google ID token
+	 * @param token Google ID token
+	 */
+	static async googleAuth(token: string) {
+		return await ApiClient.post<LoginResponse>('/api/auth/google', { token });
+	}
 }

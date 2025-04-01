@@ -30,7 +30,7 @@ export default function ModelSettings({
       {/* Header */}
       <div className="flex items-center gap-2 pb-2">
         <User className="w-5 h-5 text-muted-foreground" />
-        <h2 className="text-lg font-medium">Model Settings / Model Custom</h2>
+        <h2 className="text-lg font-medium">AI Model Settings</h2>
       </div>
 
       {/* Gender Selection */}

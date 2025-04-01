@@ -11,7 +11,7 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
 	title: 'StylesFlow',
-	description: 'Virtual Try-On Platform',
+	description: 'StylesFlow',
 };
 
 export default function RootLayout({

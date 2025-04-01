@@ -104,8 +104,14 @@ export default function AIVirtualTryOn() {
 
       if (isCampaign) {
         // Handle campaign generation
+        const platformsText = selectedPlatforms.join(' and ');
+        const campaignGenerationPrompt = `Create a concise marketing campaign for ${campaignPrompt}. Include:
+1. A brief, impactful overview (2-3 sentences)
+2. 3 catchy slogans that highlight the unique features
+Focus on ${platformsText} platforms. Keep it crisp and memorable.`;
+
         const result = await ApiClient.post<CampaignGenerationResponse>('/api/image-generation/generate-campaign', {
-          prompt: campaignPrompt,
+          prompt: campaignGenerationPrompt,
           garment_image_url: garmentImage
         });
 
@@ -251,144 +257,11 @@ export default function AIVirtualTryOn() {
 
         {/* Preview Area */}
         <div className='flex-1 flex flex-col p-6 overflow-y-auto'>
-          {/* Model Preview */}
-          <div className='w-full md:w-[1000px] h-[800px]'>
-            <div className='mb-2 text-sm font-medium text-muted-foreground'>Model Preview</div>
-            <div className='h-[calc(100%-28px)]'>
-              <ImagePreview 
-                imageUrl={overlayImage || generatedImage}
-                previewType="ai-model"
-                isOverlaid={!!overlayImage}
-                onOverlayClick={async () => {
-                  if (!generatedImage || !garmentImage) {
-                    setError('Both model and garment images are required');
-                    return;
-                  }
-
-                  setError(null);
-                  setIsGenerating(true);
-
-                  try {
-                    let tryOnModel;
-                    switch (selectedModel) {
-                      case 'cat-vton':
-                        tryOnModel = 'cat-vton';
-                        break;
-                      case 'leffa':
-                        tryOnModel = 'leffa';
-                        break;
-                      case 'kling':
-                        tryOnModel = 'kling';
-                        break;
-                      default:
-                        tryOnModel = 'leffa';
-                    }
-
-                    const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
-                      human_image_url: generatedImage,
-                      garment_image_url: garmentImage,
-                      model: tryOnModel,
-                      garment_type: garmentType
-                    });
-
-                    if (result.error) {
-                      throw new Error(result.error.message);
-                    }
-
-                    if (!result.data) {
-                      throw new Error('No response received from server');
-                    }
-
-                    if (result.data.code !== 0) {
-                      throw new Error(result.data.message || 'Failed to generate try-on image');
-                    }
-
-                    if (result.data.data?.images?.length > 0) {
-                      const imageUrl = result.data.data.images[0];
-                      setOverlayImage(imageUrl);
-                    } else {
-                      throw new Error('No valid overlay image URL was generated');
-                    }
-                  } catch (error) {
-                    setError(error instanceof Error ? error.message : 'Failed to generate overlay');
-                    setOverlayImage(null);
-                  } finally {
-                    setIsGenerating(false);
-                  }
-                }}
-                isGenerating={isGenerating}
-                garmentImage={garmentImage}
-                showOverlayButton={true}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Layout */}
-      <div className='flex flex-col w-full h-screen md:hidden overflow-x-hidden'>
-        {/* Single scrollable container */}
-        <div className='flex-1 overflow-y-auto overflow-x-hidden bg-background'>
-          <div className='p-4 pt-14 border-b border-border flex flex-col'>
-            <div className="mb-4">
-              <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-            </div>
-            {activeTab === 'ai-model' ? (
-              <AIModelTab 
-                prompt={prompt}
-                onPromptChange={setPrompt}
-                error={error}
-                gender={gender}
-                age={age}
-                skinTone={skinTone}
-                onGenderChange={setGender}
-                onAgeChange={setAge}
-                onSkinToneChange={setSkinTone}
-                onGarmentImageChange={handleGarmentImageChange}
-                selectedModel={selectedModel}
-                onModelChange={setSelectedModel}
-                garmentType={garmentType}
-                onGarmentTypeChange={setGarmentType}
-              />
-            ) : (
-              <CampaignTab 
-                onCampaignPromptChange={setCampaignPrompt}
-                onPlatformsChange={setSelectedPlatforms}
-                garmentImage={garmentImage}
-                aiModelPrompt={prompt}
-                modelSettings={`${gender}, ${age}, ${skinTone} skin tone`}
-                onGenerateClick={() => handleGenerateClick(true)}
-                isGenerating={isGenerating}
-                campaignContent={campaignContent}
-              />
-            )}
-          </div>
-          
-          {/* Button Section */}
-          {activeTab === 'ai-model' && (
-            <div className="p-4 border-b border-border">
-              <div className="space-y-3">
-                <Button 
-                  className="w-full"
-                  variant="default"
-                  onClick={() => handleGenerateClick(false)}
-                  disabled={isGenerating || !prompt.trim() || !garmentImage}
-                >
-                  {isGenerating ? "Generating..." : "Generate"}
-                </Button>
-                {error && (
-                  <p className="text-sm text-destructive text-center">{error}</p>
-                )}
-              </div>
-            </div>
-          )}
-          
-          {/* Preview Area */}
-          <div className='p-4 pb-20 max-w-full'>
+          <div className='w-full md:w-[1000px]'>
             {/* Model Preview */}
-            <div>
+            <div className={`${activeTab === 'campaign' ? 'h-[600px]' : 'h-[800px]'}`}>
               <div className='mb-2 text-sm font-medium text-muted-foreground'>Model Preview</div>
-              <div className='w-full max-w-full h-[800px]'>
+              <div className='h-[calc(100%-8px)]'>
                 <ImagePreview 
                   imageUrl={overlayImage || generatedImage}
                   previewType="ai-model"
@@ -456,6 +329,204 @@ export default function AIVirtualTryOn() {
                 />
               </div>
             </div>
+
+            {/* Campaign Text Section */}
+            {activeTab === 'campaign' && (
+              <div className='mt-6'>
+                <div className='mb-2 text-sm font-medium text-muted-foreground'>Campaign Text</div>
+                <div className='bg-card rounded-lg border border-border p-4'>
+                  {campaignContent ? (
+                    <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ 
+                      __html: campaignContent.split('\n').map(line => {
+                        if (line.startsWith('###')) {
+                          return `<h3 class="text-lg font-bold mt-4">${line.replace('###', '').trim()}</h3>`;
+                        }
+                        if (line.startsWith('####')) {
+                          return `<h4 class="text-md font-semibold mt-3">${line.replace('####', '').trim()}</h4>`;
+                        }
+                        if (line.startsWith('- ')) {
+                          return `<li class="ml-4">${line.replace('- ', '').trim()}</li>`;
+                        }
+                        line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        return line ? `<p class="my-2">${line}</p>` : '';
+                      }).join('')
+                    }} />
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center">
+                      Campaign text will appear here after generation
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className='flex flex-col w-full h-screen md:hidden overflow-x-hidden'>
+        {/* Single scrollable container */}
+        <div className='flex-1 overflow-y-auto overflow-x-hidden bg-background'>
+          <div className='p-4 pt-14 border-b border-border flex flex-col'>
+            <div className="mb-4">
+              <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+            {activeTab === 'ai-model' ? (
+              <AIModelTab 
+                prompt={prompt}
+                onPromptChange={setPrompt}
+                error={error}
+                gender={gender}
+                age={age}
+                skinTone={skinTone}
+                onGenderChange={setGender}
+                onAgeChange={setAge}
+                onSkinToneChange={setSkinTone}
+                onGarmentImageChange={handleGarmentImageChange}
+                selectedModel={selectedModel}
+                onModelChange={setSelectedModel}
+                garmentType={garmentType}
+                onGarmentTypeChange={setGarmentType}
+              />
+            ) : (
+              <CampaignTab 
+                onCampaignPromptChange={setCampaignPrompt}
+                onPlatformsChange={setSelectedPlatforms}
+                garmentImage={garmentImage}
+                aiModelPrompt={prompt}
+                modelSettings={`${gender}, ${age}, ${skinTone} skin tone`}
+                onGenerateClick={() => handleGenerateClick(true)}
+                isGenerating={isGenerating}
+                campaignContent={campaignContent}
+              />
+            )}
+          </div>
+          
+          {/* Button Section */}
+          {activeTab === 'ai-model' && (
+            <div className="p-4 border-b border-border">
+              <div className="space-y-3">
+                <Button 
+                  className="w-full"
+                  variant="default"
+                  onClick={() => handleGenerateClick(false)}
+                  disabled={isGenerating || !prompt.trim() || !garmentImage}
+                >
+                  {isGenerating ? "Generating..." : "Generate"}
+                </Button>
+                {error && (
+                  <p className="text-sm text-destructive text-center">{error}</p>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Preview Area */}
+          <div className='p-4 pb-20 max-w-full'>
+            {/* Model Preview */}
+            <div className={`${activeTab === 'campaign' ? 'h-[500px]' : 'h-[800px]'}`}>
+              <div className='mb-2 text-sm font-medium text-muted-foreground'>Model Preview</div>
+              <div className='h-[calc(100%-28px)]'>
+                <ImagePreview 
+                  imageUrl={overlayImage || generatedImage}
+                  previewType="ai-model"
+                  isOverlaid={!!overlayImage}
+                  onOverlayClick={async () => {
+                    if (!generatedImage || !garmentImage) {
+                      setError('Both model and garment images are required');
+                      return;
+                    }
+
+                    setError(null);
+                    setIsGenerating(true);
+
+                    try {
+                      let tryOnModel;
+                      switch (selectedModel) {
+                        case 'cat-vton':
+                          tryOnModel = 'cat-vton';
+                          break;
+                        case 'leffa':
+                          tryOnModel = 'leffa';
+                          break;
+                        case 'kling':
+                          tryOnModel = 'kling';
+                          break;
+                        default:
+                          tryOnModel = 'leffa';
+                      }
+
+                      const result = await ApiClient.post<VirtualTryOnResponse>('/api/image-generation/virtual-try-on', {
+                        human_image_url: generatedImage,
+                        garment_image_url: garmentImage,
+                        model: tryOnModel,
+                        garment_type: garmentType
+                      });
+
+                      if (result.error) {
+                        throw new Error(result.error.message);
+                      }
+
+                      if (!result.data) {
+                        throw new Error('No response received from server');
+                      }
+
+                      if (result.data.code !== 0) {
+                        throw new Error(result.data.message || 'Failed to generate try-on image');
+                      }
+
+                      if (result.data.data?.images?.length > 0) {
+                        const imageUrl = result.data.data.images[0];
+                        setOverlayImage(imageUrl);
+                      } else {
+                        throw new Error('No valid overlay image URL was generated');
+                      }
+                    } catch (error) {
+                      setError(error instanceof Error ? error.message : 'Failed to generate overlay');
+                      setOverlayImage(null);
+                    } finally {
+                      setIsGenerating(false);
+                    }
+                  }}
+                  isGenerating={isGenerating}
+                  garmentImage={garmentImage}
+                  showOverlayButton={true}
+                />
+              </div>
+            </div>
+
+            {/* Campaign Text Section */}
+            {activeTab === 'campaign' && (
+              <div className='mt-6'>
+                <div className='mb-2 text-sm font-medium text-muted-foreground'>Campaign Text</div>
+                <div className='bg-card rounded-lg border border-border p-4'>
+                  {campaignContent ? (
+                    <div className="space-y-4">
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <h3 className="text-lg font-bold">Overview</h3>
+                        <div className="bg-background/50 rounded p-3">
+                          {campaignContent.split('\n\n')[0]}
+                        </div>
+                      </div>
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <h3 className="text-lg font-bold">Slogans</h3>
+                        <div className="space-y-2">
+                          {campaignContent.split('\n\n')[1].split('\n').map((slogan, index) => (
+                            <div key={index} className="bg-background/50 rounded p-2 text-primary font-medium">
+                              {slogan.replace('- ', '')}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center">
+                      Campaign text will appear here after generation
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

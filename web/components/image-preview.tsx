@@ -67,15 +67,17 @@ export default function ImagePreview({
 							<p>{error}</p>
 						</div>
 					) : (
-						<img
-							key={imageUrl} // Force re-render when URL changes
-							src={imageUrl.startsWith('http') ? imageUrl : `${apiUrl}/${imageUrl}`}
-							alt='Generated image'
-							className='max-w-full h-auto max-h-[720px] rounded-lg object-contain'
-							onLoad={handleImageLoad}
-							onError={handleImageError}
-							crossOrigin="anonymous"
-						/>
+						<>
+							<img
+								key={imageUrl} // Force re-render when URL changes
+								src={imageUrl.startsWith('http') ? imageUrl : `${apiUrl}/${imageUrl}`}
+								alt='Generated image'
+								className='max-w-full h-auto max-h-[720px] rounded-lg object-contain'
+								onLoad={handleImageLoad}
+								onError={handleImageError}
+								crossOrigin="anonymous"
+							/>
+						</>
 					)}
 				</div>
 				{showOverlayButton && !isOverlaid && (

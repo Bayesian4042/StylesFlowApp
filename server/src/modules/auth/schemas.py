@@ -17,6 +17,7 @@ class UserBase(BaseModel):
     name: str = Field(..., min_length=3)
     email: EmailStr
     avatar: Optional[str] = None
+    is_admin: bool = Field(default=False, description="User admin status")
 
     @field_validator("id", mode="before")
     @classmethod

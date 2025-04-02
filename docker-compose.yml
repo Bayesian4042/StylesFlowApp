@@ -1,6 +1,8 @@
+version: '3'
+
 services:
   web:
-    build:
+    build: 
       context: ./web
       dockerfile: Dockerfile
     ports:
@@ -10,12 +12,14 @@ services:
     environment:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_APP_URL=https://stylesflow.opengig.work
+      - NEXT_PUBLIC_API_URL=https://stylesflow.opengig.work
     restart: unless-stopped
     networks:
       - app_network
 
   api:
-    build:
+    build: 
       context: ./server
       dockerfile: Dockerfile
     ports:
@@ -27,17 +31,6 @@ services:
     restart: unless-stopped
     networks:
       - app_network
-  
-  caddy:
-    image: caddy:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-    networks:
-      - app_network
-    restart: unless-stopped
 
 networks:
   app_network:

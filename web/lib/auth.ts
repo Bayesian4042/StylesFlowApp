@@ -106,16 +106,16 @@ export const authOptions: NextAuthOptions = {
 
 					// Store the backend response data
 					const userData = {
-						...user,
 						id: res.data?.user.id ?? '',
-						email: res.data?.user.email ?? '',
-						name: res.data?.user.name ?? '',
-						avatar: res.data?.user.avatar ?? '',
+						email: res.data?.user.email ?? profile.email ?? '',
+						name: res.data?.user.name ?? profile.name ?? '',
+						avatar: res.data?.user.avatar ?? profile.image ?? '',
 						token: res.data?.access_token ?? '',
 						is_admin: res.data?.user.is_admin ?? false,
 					};
 					Object.assign(user, userData);
 					account.backend_token = res.data?.access_token;
+					console.log('Updated user data:', userData);
 					return true;
 				} catch (error) {
 					console.error('Google auth error:', error);
@@ -133,8 +133,8 @@ export const authOptions: NextAuthOptions = {
 				...session,
 				user: {
 					id: token.id || token.sub || '',
-					email: token.email || '',
-					name: token.name || '',
+					email: token.email || session.user.email || '',
+					name: token.name || session.user.name || '',
 					avatar: token.avatar || session.user.image || '',
 					token: token.access_token || '',
 					is_admin: token.is_admin || false,
@@ -146,18 +146,24 @@ export const authOptions: NextAuthOptions = {
 		jwt: ({ token, account, user }) => {
 			console.log('JWT callback before:', { token, account, user });
 			
-			if (user) {
-				// Always copy user data to token when available
+			if (account?.provider === 'credentials' && user) {
 				token.id = user.id;
 				token.email = user.email;
 				token.name = user.name;
 				token.avatar = user.avatar;
 				token.is_admin = user.is_admin;
-				
-				if (account?.provider === 'credentials') {
-					token.access_token = user.token;
-				} else if (account?.provider === 'google' && account.backend_token) {
-					token.access_token = account.backend_token;
+				token.access_token = user.token;
+			} else if (account?.provider === 'google') {
+				// For Google auth, use profile data and backend response
+				if (user) {
+					token.id = user.id || '';
+					token.email = user.email || '';
+					token.name = user.name || '';
+					token.avatar = user.avatar || '';
+					token.is_admin = user.is_admin || false;
+					if (account.backend_token) {
+						token.access_token = account.backend_token;
+					}
 				}
 			}
 			

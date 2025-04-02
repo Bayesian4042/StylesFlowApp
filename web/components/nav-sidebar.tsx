@@ -19,6 +19,7 @@ export default function NavSidebar() {
 	const { theme, setTheme } = useTheme();
 	const router = useRouter();
 	const { data: session } = useSession();
+	console.log('Session data:', session);
 	
 	const handleSignOut = () => {
 		signOut({ callbackUrl: '/login' });
@@ -56,6 +57,7 @@ export default function NavSidebar() {
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 
+					{/* Show admin tab if user is admin */}
 					{session?.user?.is_admin && (
 						<SidebarMenuItem>
 							<SidebarMenuButton tooltip='Admin' onClick={handleAdmin}>

@@ -12,6 +12,7 @@ declare module 'next-auth' {
 		name: string;
 		avatar: string;
 		token: string;
+		is_admin: boolean;
 	}
 	interface Session {
 		user: User;
@@ -25,6 +26,7 @@ declare module 'next-auth/jwt' {
 		email: string;
 		name: string;
 		avatar: string;
+		is_admin: boolean;
 	}
 }
 
@@ -76,6 +78,7 @@ export const authOptions: NextAuthOptions = {
 					name: res.data?.user.name ?? '',
 					avatar: res.data?.user.avatar ?? '',
 					token: res.data?.access_token ?? '',
+					is_admin: res.data?.user.is_admin ?? false,
 				};
 			},
 		}),
@@ -101,7 +104,17 @@ export const authOptions: NextAuthOptions = {
 						return false;
 					}
 
-					// Store the token from our backend
+					// Store the backend response data
+					const userData = {
+						...user,
+						id: res.data?.user.id ?? '',
+						email: res.data?.user.email ?? '',
+						name: res.data?.user.name ?? '',
+						avatar: res.data?.user.avatar ?? '',
+						token: res.data?.access_token ?? '',
+						is_admin: res.data?.user.is_admin ?? false,
+					};
+					Object.assign(user, userData);
 					account.backend_token = res.data?.access_token;
 					return true;
 				} catch (error) {
@@ -115,28 +128,40 @@ export const authOptions: NextAuthOptions = {
 			return false;
 		},
 		session: ({ session, token }) => {
-			return {
+			console.log('Session callback:', { session, token });
+			const updatedSession = {
 				...session,
 				user: {
-					...session.user,
-					id: token.sub || '',
+					id: token.id || token.sub || '',
+					email: token.email || '',
+					name: token.name || '',
+					avatar: token.avatar || session.user.image || '',
 					token: token.access_token || '',
-					avatar: session.user.image || '',
+					is_admin: token.is_admin || false,
 				},
 			};
+			console.log('Updated session:', updatedSession);
+			return updatedSession;
 		},
 		jwt: ({ token, account, user }) => {
-			console.log('JWT callback:', { token, account, user });
-			if (account?.provider === 'credentials' && user) {
-				token.access_token = user.token;
-			} else if (account?.provider === 'google') {
-				// Store our backend token
-				if (account.backend_token) {
+			console.log('JWT callback before:', { token, account, user });
+			
+			if (user) {
+				// Always copy user data to token when available
+				token.id = user.id;
+				token.email = user.email;
+				token.name = user.name;
+				token.avatar = user.avatar;
+				token.is_admin = user.is_admin;
+				
+				if (account?.provider === 'credentials') {
+					token.access_token = user.token;
+				} else if (account?.provider === 'google' && account.backend_token) {
 					token.access_token = account.backend_token;
-				} else if (account.access_token) {
-					token.access_token = account.access_token;
 				}
 			}
+			
+			console.log('JWT callback after:', token);
 			return token;
 		},
 	},

@@ -8,6 +8,7 @@ COPY . /app
 
 # Install the application dependencies.
 WORKDIR /app
+RUN uv add asyncpg
 RUN uv sync --frozen --no-cache
 
 # RUN /app/.venv/bin/aerich migrate

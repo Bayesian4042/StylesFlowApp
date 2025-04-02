@@ -29,6 +29,9 @@ DATABASE_URL: str = config.get("DATABASE_URL", "")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is required")
 
+# Admin Configuration
+ADMIN_EMAILS: list[str] = config.get("ADMIN_EMAILS", "").split(",")
+
 # Convert postgresql:// to postgres:// for Tortoise ORM compatibility
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = "postgres://" + DATABASE_URL[len("postgresql://"):]

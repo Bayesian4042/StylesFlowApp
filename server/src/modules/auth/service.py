@@ -10,7 +10,7 @@ import requests
 from fastapi import HTTPException, status
 from src.models.user import User
 from .schemas import UserCreate, UserUpdate, Token, UserResponse
-from src.config.settings import GOOGLE_CLIENT_ID
+from src.config.settings import GOOGLE_CLIENT_ID, ADMIN_EMAILS
 from .jwt import create_access_token
 from .constants import (
     ACCESS_TOKEN_EXPIRE_DAYS,
@@ -96,6 +96,7 @@ class UserService:
             verified=False,
             verification_code=code,
             verification_code_expires_at=expires_at,
+            is_admin=user_data.email in ADMIN_EMAILS,
         )
 
         # For now, auto-verify the user since email service is not set up
@@ -188,13 +189,15 @@ class UserService:
                     google_email=google_user["email"],
                     google_picture=google_user.get("picture"),
                     is_active=True,
-                    verified=True  # Google accounts are pre-verified
+                    verified=True,  # Google accounts are pre-verified
+                    is_admin=google_user["email"] in ADMIN_EMAILS,
                 )
             else:
                 # Update existing user's Google info
                 user.google_id = google_user.get("sub")
                 user.google_email = google_user["email"]
                 user.google_picture = google_user.get("picture")
+                user.is_admin = google_user["email"] in ADMIN_EMAILS
                 await user.save()
 
             # Create access token

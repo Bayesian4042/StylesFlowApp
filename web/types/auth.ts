@@ -9,7 +9,15 @@ export type UserDto = {
 	name: string;
 	email: string;
 	avatar?: string;
+	is_admin?: boolean;
 };
+
+declare module 'next-auth' {
+	interface User extends UserDto {}
+	interface Session {
+		user: User;
+	}
+}
 
 export type UserUpdateRequest = {
 	name?: string;

@@ -25,7 +25,13 @@ REPLICATE_API_TOKEN: str = config.get("REPLICATE_API_TOKEN", "")
 FAL_API_KEY: str = config.get("FAL_API_KEY", "")
 
 # Database Settings
-DATABASE_URL: str = config.get("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/self_vton")
+DATABASE_URL: str = config.get("DATABASE_URL", "")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is required")
+
+# Convert postgresql:// to postgres:// for Tortoise ORM compatibility
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = "postgres://" + DATABASE_URL[len("postgresql://"):]
 
 # Google OAuth Settings
 GOOGLE_CLIENT_ID: str = config.get("GOOGLE_CLIENT_ID", "")

@@ -58,6 +58,20 @@ export class AuthService {
 	 * @param token Google ID token
 	 */
 	static async googleAuth(token: string) {
-		return await ApiClient.post<LoginResponse>('/api/auth/google', { token });
+		try {
+			console.log('Sending Google auth request with token:', token);
+			const response = await ApiClient.post<LoginResponse>('/api/auth/google', { token });
+			console.log('Google auth API response:', response);
+			return {
+				data: response.data,
+				error: null
+			};
+		} catch (error: any) {
+			console.error('Google auth API error:', error);
+			return {
+				data: null,
+				error: error.response?.data?.detail || 'Failed to authenticate with Google'
+			};
+		}
 	}
 }

@@ -19,17 +19,29 @@ export class ApiClient {
 			const isServer = typeof window === 'undefined';
 			const session = isServer ? await getServerSession(authOptions) : await getSession();
 
+			const headers: Record<string, string> = {
+				'Content-Type': 'application/json',
+			};
+
+			// Only add Authorization header for authenticated endpoints
+			if (session?.user.token && !config.url?.endsWith('/api/auth/google')) {
+				headers.Authorization = `Bearer ${session.user.token}`;
+			}
+
 			const client = axios.create({
 				baseURL: apiUrl,
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${session?.user.token}`,
-				},
+				headers,
 			});
 			const response: AxiosResponse<T> = await client.request(config);
 			return { data: response.data };
 		} catch (err) {
-			console.log(err);
+			const error = err as Error;
+			console.error('API Client error:', {
+				url: config.url,
+				method: config.method,
+				error: error.message,
+				response: isAxiosError(err) ? err.response?.data : undefined
+			});
 			if (isAxiosError(err)) {
 				if (err.response?.status === 422) {
 					const message = Object.values(err.response?.data.data).join(', ');

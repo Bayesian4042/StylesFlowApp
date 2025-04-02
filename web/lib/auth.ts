@@ -44,6 +44,14 @@ export const authOptions: NextAuthOptions = {
 		GoogleProvider({
 			clientId: GOOGLE_CLIENT_ID,
 			clientSecret: GOOGLE_CLIENT_SECRET,
+			authorization: {
+				params: {
+					prompt: "consent",
+					access_type: "offline",
+					response_type: "code",
+					scope: "openid email profile"
+				}
+			}
 		}),
 		CredentialsProvider({
 			name: 'Credentials',
@@ -73,8 +81,35 @@ export const authOptions: NextAuthOptions = {
 		}),
 	],
 	callbacks: {
-		async signIn({ account, profile }) {
+		async signIn({ account, profile, user }) {
+			console.log('SignIn callback:', { account, profile, user });
+			
 			if (account?.provider === 'google' && profile?.email) {
+				try {
+					console.log('Full account object:', account);
+					
+					if (!account.access_token) {
+						console.error('No access token available');
+						return false;
+					}
+
+					const res = await AuthService.googleAuth(account.access_token);
+					console.log('Google auth response:', res);
+					
+					if (res.error) {
+						console.error('Google auth error:', res.error);
+						return false;
+					}
+
+					// Store the token from our backend
+					account.backend_token = res.data?.access_token;
+					return true;
+				} catch (error) {
+					console.error('Google auth error:', error);
+					return false;
+				}
+			}
+			if (account?.provider === 'credentials') {
 				return true;
 			}
 			return false;
@@ -90,9 +125,17 @@ export const authOptions: NextAuthOptions = {
 				},
 			};
 		},
-		jwt: ({ token, account }) => {
-			if (account) {
-				token.access_token = account.access_token;
+		jwt: ({ token, account, user }) => {
+			console.log('JWT callback:', { token, account, user });
+			if (account?.provider === 'credentials' && user) {
+				token.access_token = user.token;
+			} else if (account?.provider === 'google') {
+				// Store our backend token
+				if (account.backend_token) {
+					token.access_token = account.backend_token;
+				} else if (account.access_token) {
+					token.access_token = account.access_token;
+				}
 			}
 			return token;
 		},

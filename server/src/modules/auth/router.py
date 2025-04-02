@@ -14,8 +14,7 @@ from .schemas import (
     GoogleAuthRequest,
 )
 from .service import UserService
-from .google import GoogleAuthService
-from src.dependencies import get_current_user, require_auth
+from .dependencies import get_current_user, require_auth
 from .exceptions import EmailAlreadyExistsException, UserNotFoundException
 from src.models.user import User
 
@@ -49,33 +48,19 @@ async def login(login_data: LoginRequest):
     return await UserService.authenticate_user(login_data.email, login_data.password)
 
 
-@router.post("/google", response_model=Token)
-async def google_auth(auth_data: GoogleAuthRequest):
-    """Authenticate with Google and return JWT token"""
-    try:
-        return await GoogleAuthService.authenticate_google_user(auth_data.token)
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-        )
-
-
 # User management routes
 users_router = APIRouter(prefix="/users")
 
 
-@users_router.get("/me", response_model=UserResponse)
-@require_auth
+@users_router.get("/me", response_model=UserResponse, dependencies=[Depends(get_current_user)])
 async def get_current_user_info(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_user)]
 ):
     """Get current user information"""
     return current_user
 
 
-@users_router.patch("/me", response_model=UserResponse)
-@require_auth
+@users_router.patch("/me", response_model=UserResponse, dependencies=[Depends(get_current_user)])
 async def update_current_user(
     user_data: UserUpdate, current_user: Annotated[User, Depends(get_current_user)]
 ):
@@ -92,12 +77,16 @@ async def update_current_user(
     return updated_user
 
 
-@users_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
-@require_auth
+@users_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(get_current_user)])
 async def delete_current_user(current_user: Annotated[User, Depends(get_current_user)]):
     """Delete current user"""
     await UserService.delete_user(current_user.id)
 
+
+@router.post("/google", response_model=Token)
+async def google_auth(auth_data: GoogleAuthRequest):
+    """Authenticate with Google and return JWT token"""
+    return await UserService.google_auth(auth_data.token)
 
 # Include users router
 router.include_router(users_router)

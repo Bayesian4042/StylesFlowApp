@@ -2,6 +2,7 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from tortoise.contrib.fastapi import register_tortoise
 
 from src.config import settings, constants
 import datetime
@@ -10,6 +11,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from src.modules.image_generation.router import router as image_generation_router
 from src.modules.routers.generated_images import generated_images_router
+from src.modules.routers.admin import router as admin_router
+from src.modules.auth.router import router as auth_router
 
 load_dotenv('.env')
 # Configure logging
@@ -53,6 +56,28 @@ app.include_router(
     generated_images_router,
     prefix="/api",
     tags=["Generated Images"]
+)
+
+# Add admin router
+app.include_router(
+    admin_router,
+    prefix="/api",
+    tags=["Admin"]
+)
+
+# Add auth router
+app.include_router(
+    auth_router,
+    prefix="/api",
+    tags=["Auth"]
+)
+
+# Register Tortoise ORM
+register_tortoise(
+    app,
+    config=settings.TORTOISE_ORM,
+    generate_schemas=True,
+    add_exception_handlers=True,
 )
 
 # Ensure output directory exists at startup

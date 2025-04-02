@@ -23,6 +23,9 @@ class User(models.Model):
     google_email = fields.CharField(max_length=255, null=True)
     google_picture = fields.CharField(max_length=255, null=True)
     
+    # Admin flag
+    is_admin = fields.BooleanField(default=False)
+    
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 

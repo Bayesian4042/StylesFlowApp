@@ -1,4 +1,5 @@
-import { Home, Shirt, History, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { Shirt, LogOut, Sun, Moon, UserCog } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
 	Sidebar,
 	SidebarHeader,
@@ -11,11 +12,13 @@ import {
 	SidebarRail,
 } from '@/components/ui/sidebar';
 import AuthCheck from '@/components/auth/AuthCheck';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 
 export default function NavSidebar() {
 	const { theme, setTheme } = useTheme();
+	const router = useRouter();
+	const { data: session } = useSession();
 	
 	const handleSignOut = () => {
 		signOut({ callbackUrl: '/login' });
@@ -24,10 +27,18 @@ export default function NavSidebar() {
 	const toggleTheme = () => {
 		setTheme(theme === 'light' ? 'dark' : 'light');
 	};
+
+	const handleVirtualTryOn = () => {
+		router.push('/virtual-try-on');
+	};
+
+	const handleAdmin = () => {
+		router.push('/admin');
+	};
 	return (
 		<Sidebar collapsible='icon' className='transition-[width] duration-300'>
 			<SidebarRail />
-			<SidebarHeader className='border-b border-border'>
+			<SidebarHeader>
 				<div className='flex items-center justify-between px-4 py-3'>
 					<h1 className='text-lg font-semibold transition-opacity duration-300 group-data-[collapsible=icon]:opacity-0'>
 					StylesFlow
@@ -39,32 +50,20 @@ export default function NavSidebar() {
 			<SidebarContent>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton tooltip='Home'>
-							<Home className='h-4 w-4' />
-							<span>Home</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-
-					<SidebarMenuItem>
-						<SidebarMenuButton tooltip='Virtual Try-On' isActive={true}>
+						<SidebarMenuButton tooltip='Virtual Try-On' isActive={true} onClick={handleVirtualTryOn}>
 							<Shirt className='h-4 w-4' />
 							<span>Virtual Try-On</span>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 
-					<SidebarMenuItem>
-						<SidebarMenuButton tooltip='History'>
-							<History className='h-4 w-4' />
-							<span>History</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-
-					<SidebarMenuItem>
-						<SidebarMenuButton tooltip='Settings'>
-							<Settings className='h-4 w-4' />
-							<span>Settings</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
+					{session?.user?.is_admin && (
+						<SidebarMenuItem>
+							<SidebarMenuButton tooltip='Admin' onClick={handleAdmin}>
+								<UserCog className='h-4 w-4' />
+								<span>Admin</span>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					)}
 				</SidebarMenu>
 			</SidebarContent>
 

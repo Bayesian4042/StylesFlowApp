@@ -8,7 +8,7 @@ from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from src.config import settings
 
-from .constants import JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_DAYS, INVALID_TOKEN_ERROR
+from .constants import JWT_ALGORITHM, INVALID_TOKEN_ERROR
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -24,10 +24,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     """
     to_encode = data.copy()
     expire = datetime.now(UTC) + (
-        expires_delta or timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
 def verify_token(token: str) -> dict:
@@ -44,7 +44,7 @@ def verify_token(token: str) -> dict:
         HTTPException: If token is invalid or expired
     """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return payload
     except JWTError:
         raise HTTPException(

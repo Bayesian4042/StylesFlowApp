@@ -12,8 +12,8 @@ services:
     environment:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
-      - NEXT_PUBLIC_APP_URL=https://stylesflow.opengig.work
-      - NEXT_PUBLIC_API_URL=https://stylesflow.opengig.work
+      - NEXT_PUBLIC_APP_URL=https://stylesflow-app.opengig.work
+      - NEXT_PUBLIC_API_URL=https://stylesflow-app.opengig.work
     restart: unless-stopped
     networks:
       - app_network

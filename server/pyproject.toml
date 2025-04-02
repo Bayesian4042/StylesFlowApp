@@ -18,9 +18,7 @@ dependencies = [
     "python-jose[cryptography]>=3.4.0",
     "replicate>=1.0.4",
     "requests>=2.32.3",
-    "tortoise-orm[asyncpg]>=0.24.0",
-    "asyncpg>=0.29.0",
-]
+    "tortoise-orm[asyncpg]>=0.24.0"]
 
 [dependency-groups]
 dev = [
